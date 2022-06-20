@@ -9,23 +9,25 @@ export default createStore({
   },
 
   getters: {
-    getProducts () {
+    getAllProducts () {
       return products
     },
     geSingleProduct (productId) {
       return products.find(product => product.id === productId)
     },
     getPrice (state) {
+      let price
       state.productsON.forEach(product => {
-        state.price += product.quantity * product.price
+        price += product.quantity * product.price
       })
-      return state.price
+      return price
     },
     getQuantity (state) {
+      let quantity
       state.productsON.forEach(product => {
-        state.quantity += product.quantity
+        quantity += product.quantity
       })
-      return state.quantity
+      return quantity
     }
   },
 
