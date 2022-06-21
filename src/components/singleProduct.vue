@@ -6,38 +6,37 @@
         <div class="products-info">
           <h2>{{ product.title }}</h2>
           <div class="product-price"><p>{{ product.price }}0 Kč</p>
-            <div v-if="isProductSelected(product.id)===false" @click="addProduct(product.id)" class="product-add product-not-select">
-              <p>Přidat</p>
-            </div>
-            <div v-if="isProductSelected(product.id)" class="product-add product-select">
-              <a id="product-button-left" @click="quantityMinus(product.id)" >-</a>
-              <p>{{ getQuntity }}</p>
-              <a id="product-button-right" @click="quantityPlus(product.id)" >+</a>
-            </div>
+            <counter :product="product"/>
           </div>
         </div>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters } from 'vuex'
+import counter from '../components/counter.vue'
 
 export default {
   name: 'product',
   props: {
     product: Object
   },
+  components: {
+    counter
+  },
   computed: {
     ...mapGetters(['isProductSelected']),
     imgSrc () {
       return `assets/img/${this.product.title}.webp`
     },
-    getQuntity () {
-      return this.$store.getters.getProductById(this.product.id)
+    quntity: {
+      get () {
+        return this.$store.getters.getQuantityById(this.product.id)
+      },
+      set (value) {
+        this.$store.commit('setQuantityById', { id: this.product.id, quantity: value })
+      }
     }
-  },
-  methods: {
-    ...mapMutations(['addProduct', 'quantityPlus', 'quantityMinus'])
   }
 }
 </script>
@@ -76,63 +75,6 @@ export default {
   h2 {
     font-size: 1.25em;
     font-weight: 600;
-  }
-}
-
-.product-add {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 130px;
-  height: 40px;
-  border-radius: 100px;
-  cursor: pointer;
-}
-.product-not-select {
-  transition: all 0.3s ease-in-out;
-  background-color: #d31818;
-  &:hover {
-    background-color: #c91c1c;
-  }
-  p {
-  font-size: 1em;
-  font-weight: 600;
-  color: #fff;
-  }
-}
-.product-select {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  border: 1px solid #b3b3b3;
-  a {
-    font-size: 1.5em;
-    font-weight: 600;
-    cursor: pointer;
-    height: 38px;
-    width: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s ease-in-out;
-  }
-  p {
-    text-align: center;
-    width: 50px;
-    font-size: 1em;
-    font-weight: 600;
-  }
-  #product-button-left {
-    border-radius: 100px 0  0 100px;
-    &:hover {
-      background-color: #d31818;
-    }
-  }
-  #product-button-right {
-    border-radius: 0 100px 100px 0;
-    background-color: #d63333;
-    &:hover {
-      background-color: #d31818;
-    }
   }
 }
 

@@ -7,6 +7,9 @@ export default createStore({
   },
 
   getters: {
+    getAllProducts () {
+      return products
+    },
     getSelectedProducts (state) {
       const obj = []
       state.selectedProducts.forEach(item => {
@@ -14,11 +17,8 @@ export default createStore({
       })
       return obj
     },
-    getAllProducts () {
-      return products
-    },
-    getProductById: (state) => (id) => {
-      return state.selectedProducts.find(product => product.id === id).quantity
+    getQuantityById: (state) => (productId) => {
+      return state.selectedProducts.find(product => product.id === productId).quantity
     },
     isProductSelected: (state) => (productId) => {
       return state.selectedProducts.some(product => product.id === productId)
@@ -32,12 +32,18 @@ export default createStore({
     },
     getQuantity (state) {
       return state.selectedProducts.length
+    },
+    getPriceByProductId: (state) => (productId) => {
+      return Math.round(((products.find(product => product.id === productId).price * state.selectedProducts.find(product => product.id === productId).quantity) + Number.EPSILON) * 100) / 100
     }
   },
 
   mutations: {
     addProduct (state, productId) {
       state.selectedProducts.push({ id: productId, quantity: 1 })
+    },
+    removeProduct (state, productId) {
+      state.selectedProducts = state.selectedProducts.filter(product => product.id !== productId)
     },
     quantityPlus (state, productId) {
       state.selectedProducts.find(product => product.id === productId).quantity++
@@ -48,6 +54,9 @@ export default createStore({
       } else {
         state.selectedProducts.splice(state.selectedProducts.findIndex(product => product.id === productId), 1)
       }
+    },
+    setQuantityById (state, payload) {
+      state.selectedProducts.find(product => product.id === payload.id).quantity = payload.quantity
     }
   },
   actions: {

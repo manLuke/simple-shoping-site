@@ -1,9 +1,11 @@
 <template>
-  <div v-if="getQuantity===0" class="kosik">
-    <div class="kosik-empty">
+  <div class="kosik-empty-page">
+    <div v-if="getQuantity===0" class="kosik-empty">
       <span>Máte prázdný košík, pojďme to <i @click="this.$router.push('/')" id="kosik-empty-change">změnit</i></span>
     </div>
-    <kosikSingleProduct v-for="(item, index) in getSelectedProducts" :key="index" :product="item" />
+    <div class="kosik" v-if="getQuantity!==0">
+      <kosikSingleProduct v-for="(item, index) in getSelectedProducts" :key="index" :product="item" />
+    </div>
   </div>
 </template>
 
@@ -25,10 +27,15 @@ export default {
 <style lang="scss">
 
 .kosik {
-  padding: 15vh 0 5vh 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  gap: 1.5rem;
 }
 .kosik-empty {
-  margin: 10vW 0 ;
+  margin: 10vH 0 ;
   font-size: 2.5rem;
   font-weight: 600;
   padding: 10vh;
