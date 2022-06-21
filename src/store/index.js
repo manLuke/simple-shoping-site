@@ -3,34 +3,35 @@ import products from '../assets/json/products.json'
 
 export default createStore({
   state: {
-    selectedProducts: [],
-    price: 0,
-    quantity: 0
+    selectedProducts: []
   },
 
   getters: {
     getSelectedProducts (state) {
-      return state.selectedProducts
+      const obj = []
+      state.selectedProducts.forEach(item => {
+        obj.push(products.find(product => product.id === item.id))
+      })
+      return obj
     },
     getAllProducts () {
       return products
     },
-    geSingleProduct (productId) {
-      return products.find(product => product.id === productId)
+    getProductById: (state) => (id) => {
+      return state.selectedProducts.find(product => product.id === id).quantity
+    },
+    isProductSelected: (state) => (productId) => {
+      return state.selectedProducts.some(product => product.id === productId)
     },
     getPrice (state) {
       let price = 0
-      state.selectedProducts.forEach(product => {
-        price += product.quantity * product.price
+      state.selectedProducts.forEach(item => {
+        price += item.quantity * (products.find(product => product.id === item.id).price)
       })
-      return price
+      return Math.round((price + Number.EPSILON) * 100) / 100
     },
     getQuantity (state) {
-      let quantity = 0
-      state.selectedProducts.forEach(product => {
-        quantity += product.quantity
-      })
-      return quantity
+      return state.selectedProducts.length
     }
   },
 
@@ -42,7 +43,7 @@ export default createStore({
       state.selectedProducts.find(product => product.id === productId).quantity++
     },
     quantityMinus (state, productId) {
-      if (state.selectedProducts.find(product => product.id === productId).quantity >= 1) {
+      if (state.selectedProducts.find(product => product.id === productId).quantity > 1) {
         state.selectedProducts.find(product => product.id === productId).quantity--
       } else {
         state.selectedProducts.splice(state.selectedProducts.findIndex(product => product.id === productId), 1)

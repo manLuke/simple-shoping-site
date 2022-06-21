@@ -31,7 +31,7 @@
         </svg>
       </div>
       <div class="cart-quantity"><p>{{ getQuantity }}</p></div>
-      <div class="price">{{ getPrice }}</div>
+      <div class="price">{{ getPrice }} Kč</div>
     </div>
   </nav>
 </template>
@@ -50,22 +50,22 @@ export default {
 
 <style lang="scss">
 .navbar {
+  position: fixed;
+  z-index: 1;
   display: flex;
   align-items: center;
-  margin: 0 auto;
   font-size: 1.5rem;
+  font-weight: 600;
   width: 100%;
   height: 80px;
-  font-weight: 600;
-
+  margin: 0 auto;
+  background-color: #fff;
 }
 
 .navbar-logo {
-  position: absolute;
-  left: 0;
-  top: 15px;
+  padding: 0 1em;
   font-size: 1.5em;
-  width: 90%;
+  width: 100%;
   text-align: center;
   a {
     cursor: pointer;

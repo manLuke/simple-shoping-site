@@ -1,6 +1,6 @@
 <template>
 <div class="index">
-    <h2>Vyberte si z našeho zboží.</h2>
+    <h2 id="index-title">Vyberte si z našeho zboží.</h2>
     <div class="mainPage">
       <div class="mainPage-products">
         <singleProduct v-for="item in getAllProducts" :key="item.id" :product="item"/>
@@ -26,6 +26,14 @@ export default {
 </script>
 
 <style lang="scss">
+.index {
+  text-align: center;
+  #index-title {
+    font-size: 2em;
+    margin: 1rem;
+  }
+}
+
 .mainPage-products {
   display: flex;
   gap: 1em;
