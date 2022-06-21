@@ -1,4 +1,4 @@
-# pekarna.cz
+# simple-shoping-site
 
 ## Project setup
 ```
