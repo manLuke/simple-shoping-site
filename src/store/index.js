@@ -3,12 +3,15 @@ import products from '../assets/json/products.json'
 
 export default createStore({
   state: {
-    productsON: [],
+    selectedProducts: [],
     price: 0,
     quantity: 0
   },
 
   getters: {
+    getSelectedProducts (state) {
+      return state.selectedProducts
+    },
     getAllProducts () {
       return products
     },
@@ -16,15 +19,15 @@ export default createStore({
       return products.find(product => product.id === productId)
     },
     getPrice (state) {
-      let price
-      state.productsON.forEach(product => {
+      let price = 0
+      state.selectedProducts.forEach(product => {
         price += product.quantity * product.price
       })
       return price
     },
     getQuantity (state) {
-      let quantity
-      state.productsON.forEach(product => {
+      let quantity = 0
+      state.selectedProducts.forEach(product => {
         quantity += product.quantity
       })
       return quantity
@@ -33,16 +36,16 @@ export default createStore({
 
   mutations: {
     addProduct (state, productId) {
-      state.productsON.push({ id: productId, quantity: 1 })
+      state.selectedProducts.push({ id: productId, quantity: 1 })
     },
     quantityPlus (state, productId) {
-      state.productsON.find(product => product.id === productId).quantity++
+      state.selectedProducts.find(product => product.id === productId).quantity++
     },
     quantityMinus (state, productId) {
-      if (state.productsON.find(product => product.id === productId).quantity >= 1) {
-        state.productsON.find(product => product.id === productId).quantity--
+      if (state.selectedProducts.find(product => product.id === productId).quantity >= 1) {
+        state.selectedProducts.find(product => product.id === productId).quantity--
       } else {
-        state.productsON.splice(state.productsON.findIndex(product => product.id === productId), 1)
+        state.selectedProducts.splice(state.selectedProducts.findIndex(product => product.id === productId), 1)
       }
     }
   },

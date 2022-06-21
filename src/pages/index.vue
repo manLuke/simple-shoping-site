@@ -25,4 +25,14 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="scss">
+.mainPage-products {
+  display: flex;
+  gap: 1em;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1200px;
+}
+</style>
