@@ -76,9 +76,6 @@ export default {
   }
   #product-button-left {
     border-radius: 100px 0  0 100px;
-    &:hover {
-      background-color: #d31818;
-    }
   }
   #product-button-right {
     border-radius: 0 100px 100px 0;
@@ -107,6 +104,14 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
   border: none;
+}
+
+@media screen and (min-width: 470px) {
+    #product-button-left {
+    &:hover {
+      background-color: #d31818;
+    }
+  }
 }
 
 </style>
