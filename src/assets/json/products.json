@@ -28,5 +28,35 @@
         "id": 5,
         "title": "Kaiserka cereální",
         "price": 4.50
+    },
+    {
+        "id": 6,
+        "title": "Croissant máslový s čokoládovou náplní",
+        "price": 22.9
+    },
+    {
+        "id": 7,
+        "title": "Donut s čokoládovou příchutí",
+        "price": 13.9
+    },
+    {
+        "id": 8,
+        "title": "Makový koláč",
+        "price": 10.9
+    },
+    {
+        "id": 9,
+        "title": "Pekárna Brod Loupák",
+        "price": 8.9
+    },
+    {
+        "id": 10,
+        "title": "Breadway Focaccia s olivovým olejem",
+        "price": 44.9
+    },
+    {
+        "id": 11,
+        "title": "Bageta z kamenné pece",
+        "price": 35.9
     }
 ]
