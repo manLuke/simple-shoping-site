@@ -1,5 +1,6 @@
 <template>
   <nav class="navbar">
+    <a class="navbar-admin" @click="this.$router.push('/admin')">Admin</a>
     <div class="navbar-logo">
       <a @click="this.$router.push('/')">Pekárna.cz</a>
     </div>
@@ -105,6 +106,18 @@ export default {
   .price {
     font-size: .5em;
     transform: translateX(4px);
+  }
+}
+
+// admin
+.navbar-admin {
+  font-size: 1rem;
+  position: fixed;
+  z-index: 1;
+  left: .5rem;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
   }
 }
 </style>

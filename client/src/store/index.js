@@ -1,19 +1,21 @@
 import { createStore } from 'vuex'
-import products from '../assets/json/products.json'
+import axios from 'axios'
+const url = 'http://localhost:5000/api/products'
 
 export default createStore({
   state: {
+    products: [],
     selectedProducts: []
   },
 
   getters: {
-    getAllProducts () {
-      return products
+    getAllProducts (state) {
+      return state.products
     },
     getSelectedProducts (state) {
       const obj = []
       state.selectedProducts.forEach(item => {
-        obj.push(products.find(product => product.id === item.id))
+        obj.push(state.products.find(product => product.id === item.id))
       })
       return obj
     },
@@ -26,7 +28,7 @@ export default createStore({
     getPrice (state) {
       let price = 0
       state.selectedProducts.forEach(item => {
-        price += item.quantity * (products.find(product => product.id === item.id).price)
+        price += item.quantity * (state.products.find(product => product.id === item.id).price)
       })
       return Math.round((price + Number.EPSILON) * 100) / 100
     },
@@ -34,11 +36,14 @@ export default createStore({
       return state.selectedProducts.length
     },
     getPriceByProductId: (state) => (productId) => {
-      return Math.round(((products.find(product => product.id === productId).price * state.selectedProducts.find(product => product.id === productId).quantity) + Number.EPSILON) * 100) / 100
+      return Math.round(((state.products.find(product => product.id === productId).price * state.selectedProducts.find(product => product.id === productId).quantity) + Number.EPSILON) * 100) / 100
     }
   },
 
   mutations: {
+    setProducts (state, products) {
+      state.products = products
+    },
     addProduct (state, productId) {
       state.selectedProducts.push({ id: productId, quantity: 1 })
     },
@@ -60,6 +65,16 @@ export default createStore({
     }
   },
   actions: {
+    async getProductsFromAPI({ commit }) {
+      try {
+        const response = await axios.get(url)
+        const products = response.data
+        commit('setProducts', products)
+      }
+      catch (err) {
+        console.log(err.message)
+      }
+    }
   },
   modules: {
   }

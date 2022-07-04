@@ -11,6 +11,7 @@
 
 <script>
 import singleProduct from '../components/singleProduct.vue'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'index',
@@ -18,9 +19,7 @@ export default {
     singleProduct
   },
   computed: {
-    getAllProducts () {
-      return this.$store.getters.getAllProducts
-    }
+    ...mapGetters(['getAllProducts'])
   }
 }
 </script>

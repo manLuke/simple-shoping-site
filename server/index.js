@@ -1,12 +1,14 @@
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const fs = require('fs');
+// const fs = require('fs');
+const cors = require('cors');
 const app = express();
 const pool = require('./db');
 
 
 app.use(express.json()); // => req.body
 app.use(fileUpload());
+app.use(cors());
 
 
 
@@ -40,11 +42,12 @@ app.get('/api/products', async (req, res) => {
 })
 
 //get one product
+//not use yet, vuex does the job more efficiently
 
 app.get('/api/products/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const oneProduct = await pool.query('SELECT * FROM products WHERE product_id = $1', [id]);
+    const oneProduct = await pool.query('SELECT * FROM products WHERE id = $1', [id]);
     if (oneProduct.rows[0] === undefined) {
       res.status(404).send('Product not found');
     } else {
@@ -72,18 +75,19 @@ app.post('/api/products', async (req, res) => {
 //update a product
 
 app.put('/api/products/:id', async (req, res) => {
+  let updateProduct;
   const { id } = req.params;
   const argKey = Object.keys(req.body);
   try {
     console.log(argKey)
     if (argKey.length === 1) {
-      const updateProduct = await pool.query(`UPDATE products SET ${argKey} = $1 WHERE product_id = $2 RETURNING *`, [req.body[argKey], id]);
+      const updateProduct = await pool.query(`UPDATE products SET ${argKey} = $1 WHERE id = $2 RETURNING *`, [req.body[argKey], id]);
       res.json(updateProduct.rows[0]);
     } else if (argKey.length === 2) {
-      const updateProduct = await pool.query(`UPDATE products SET ${argKey[0]} = $1, ${argKey[1]} = $2 WHERE product_id = $3 RETURNING *`, [req.body[argKey[0]], req.body[argKey[1]], id]);
+      const updateProduct = await pool.query(`UPDATE products SET ${argKey[0]} = $1, ${argKey[1]} = $2 WHERE id = $3 RETURNING *`, [req.body[argKey[0]], req.body[argKey[1]], id]);
       res.json(updateProduct.rows[0]);
     } else if (argKey === 3) {
-      const updateProduct = await pool.query(`UPDATE products SET ${argKey[0]} = $1, ${argKey[1]} = $2, ${argKey[2]} = $3 WHERE product_id = $4 RETURNING *`, [req.body[argKey[0]], req.body[argKey[1]], req.body[argKey[2]], id]);
+      const updateProduct = await pool.query(`UPDATE products SET ${argKey[0]} = $1, ${argKey[1]} = $2, ${argKey[2]} = $3 WHERE id = $4 RETURNING *`, [req.body[argKey[0]], req.body[argKey[1]], req.body[argKey[2]], id]);
       res.json(updateProduct.rows[0]);
     } else {
       res.status(400).send('Bad Request');
@@ -97,12 +101,12 @@ app.put('/api/products/:id', async (req, res) => {
 //delete a product
 
 app.delete('/api/products/:id', async (req, res) => {
-  const { id } = req.params;
   try {
-    const productName = await pool.query('SELECT title FROM products WHERE product_id = $1', [id]);
-    console.log(productName);
-    const deleteProduct = await pool.query("DELETE FROM products WHERE product_id = $1 RETURNING *", [id]);
-    fs.unlinkSync(`${__dirname}/../client/public/assets/uploads/${productName.rows[0].title}.webp`);
+    const { id } = req.params;
+    const deleteProduct = await pool.query("DELETE FROM products WHERE id = $1", [id]);
+    // fs.unlinkSync(`${__dirname}/../client/public/assets/uploads/${productName.rows[0].title}.webp`);
+    console.log("Deleting product...");
+    console.log("Product was successfully deleted");
     res.json("Product was successfully deleted");
   } catch (err) {
     console.error(err.message);
@@ -111,6 +115,6 @@ app.delete('/api/products/:id', async (req, res) => {
 })
 
 
-app.listen(8081, () => {
-  console.log('Server is running on port 8081');
+app.listen(5000, () => {
+  console.log('Server is running on port 5000');
 })

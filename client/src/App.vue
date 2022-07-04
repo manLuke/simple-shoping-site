@@ -10,6 +10,9 @@ export default {
   name: 'app',
   components: {
     navbar
+  },
+  mounted () {
+    this.$store.dispatch('getProductsFromAPI')
   }
 }
 </script>
