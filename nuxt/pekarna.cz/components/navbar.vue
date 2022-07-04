@@ -4,7 +4,7 @@
       <a @click="this.$router.push('/')">Pekárna.cz</a>
     </div>
     <div class="navbar-cart" @click="this.$router.push('/kosik')">
-      <div class="cart-logo" :cart-quantity="getQuantity">
+      <div class="cart-logo">
         <svg
           version="1.0"
           xmlns="http://www.w3.org/2000/svg"
@@ -30,6 +30,7 @@
           </g>
         </svg>
       </div>
+      <div class="cart-quantity"><p>{{ getQuantity }}</p></div>
       <div class="price">{{ getPrice }} Kč</div>
     </div>
   </nav>
@@ -88,8 +89,7 @@ export default {
     width: 50px;
     height: 50px;
   }
-  &:before {
-    content: attr(cart-quantity);
+  .cart-quantity {
     position: absolute;
     top: 5px;
     right: 10px;
