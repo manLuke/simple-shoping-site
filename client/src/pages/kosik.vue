@@ -1,5 +1,5 @@
 <template>
-  <div class="kosik-empty-page">
+  <div class="kosik-empty-page" @click="checkQuantity()">
     <div v-if="getQuantity===0" class="kosik-empty">
       <span>Máte prázdný košík, pojďme to <i @click="this.$router.push('/')" id="kosik-empty-change">změnit</i></span>
     </div>
@@ -20,6 +20,11 @@ export default {
   },
   computed: {
     ...mapGetters(['getQuantity', 'getSelectedProducts'])
+  },
+  methods: {
+    checkQuantity() {
+      this.$store.dispatch('checkQuantity')
+    }
   }
 }
 </script>

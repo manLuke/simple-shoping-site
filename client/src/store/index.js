@@ -1,11 +1,12 @@
 import { createStore } from 'vuex'
 import axios from 'axios'
-const url = 'http://localhost:5000/api/products'
+const url = 'http://10.0.1.47:5000/api/products'
 
 export default createStore({
   state: {
     products: [],
-    selectedProducts: []
+    selectedProducts: [],
+    focusedProduct: null,
   },
 
   getters: {
@@ -46,14 +47,17 @@ export default createStore({
     },
     addProduct (state, productId) {
       state.selectedProducts.push({ id: productId, quantity: 1 })
+      state.focusedProduct = productId
     },
     removeProduct (state, productId) {
       state.selectedProducts = state.selectedProducts.filter(product => product.id !== productId)
     },
     quantityPlus (state, productId) {
       state.selectedProducts.find(product => product.id === productId).quantity++
+      state.focusedProduct = productId
     },
     quantityMinus (state, productId) {
+      state.focusedProduct = productId
       if (state.selectedProducts.find(product => product.id === productId).quantity > 1) {
         state.selectedProducts.find(product => product.id === productId).quantity--
       } else {
@@ -61,6 +65,7 @@ export default createStore({
       }
     },
     setQuantityById (state, payload) {
+      state.focusedProduct = payload.id
       state.selectedProducts.find(product => product.id === payload.id).quantity = payload.quantity
     }
   },
@@ -74,6 +79,16 @@ export default createStore({
       catch (err) {
         console.log(err.message)
       }
+    },
+    checkQuantity ({ state, commit }) {
+      state.selectedProducts.forEach(item => {
+        if (item.quantity === "" || item.quantity === 0) {
+          commit('removeProduct', item.id)
+        }
+        else if (item.quantity > 60) {
+          commit('setQuantityById', { id: item.id, quantity: 60 })
+        }
+      })
     }
   },
   modules: {

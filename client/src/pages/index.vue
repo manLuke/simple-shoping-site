@@ -1,5 +1,5 @@
 <template>
-<div class="index">
+<div class="index" @click="checkQuantity()">
     <h2 id="index-title">Vyberte si z našeho zboží.</h2>
     <div class="mainPage">
       <div class="mainPage-products">
@@ -20,6 +20,11 @@ export default {
   },
   computed: {
     ...mapGetters(['getAllProducts'])
+  },
+  methods: {
+    checkQuantity() {
+      this.$store.dispatch('checkQuantity')
+    }
   }
 }
 </script>
