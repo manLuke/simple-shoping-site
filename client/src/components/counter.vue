@@ -42,6 +42,7 @@ export default {
     quantityPlus () {
       if (this.quntity >= 60) {
           this.stopAddingQuantity = true
+          this.$store.commit('setQuantityById', { id: this.product.id, quantity: 60})
         } else if (this.quntity <= 60 || this.quntity >= 0) {
           this.$store.commit('quantityPlus', this.product.id)
         }
@@ -120,10 +121,11 @@ export default {
 }
 
 #product-v-model {
-  width: 50px;
+  width: 48px;
+  margin: 0 1.5px;
   height: 36px;
   transform: translateY(-1px);
-  z-index: 2;
+  // z-index: 2;
   text-align: center;
   font-size: 1em;
   font-weight: 600;
