@@ -1,36 +1,20 @@
 const express = require('express');
 const http = require('http');
-const fileUpload = require('express-fileupload');
+// const fileUpload = require('express-fileupload');
 // const fs = require('fs');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 const app = express();
 const pool = require('./db');
 
 
 app.use(express.json()); // => req.body
-app.use(fileUpload());
 app.use(cors());
+// app.use(fileUpload());
 
+// ROUTES
 
-
-//upload image
-
-app.post('/api/images', async (req, res) => {
-  let file = req.files.file;
-  try {
-    await console.log();
-    await file.mv(`${__dirname}/../client/public/assets/uploads/${file.name}`);
-    res.send(`${file.name} uploaded!`).status(200);
-    console.log(`${file.name} uploaded!`);
-  } catch (err) {
-    res.status(500).send(err);
-    console.log(err);
-  }
-})
-
-//ROUTES
-
-//get all products
+// get all products
 
 app.get('/api/products', async (req, res) => {
   try {
@@ -42,8 +26,8 @@ app.get('/api/products', async (req, res) => {
   }
 })
 
-//get one product
-//not use yet, vuex does the job more efficiently
+// get one product
+// not use yet, vuex does the job more efficiently
 
 app.get('/api/products/:id', async (req, res) => {
   const { id } = req.params;
@@ -60,7 +44,7 @@ app.get('/api/products/:id', async (req, res) => {
   }
 })
 
-//create a product
+// create a product
 
 app.post('/api/products', async (req, res) => {
   try {
@@ -73,7 +57,7 @@ app.post('/api/products', async (req, res) => {
   }
 })
 
-//update a product
+// update a product
 
 app.put('/api/products/:id', async (req, res) => {
   let updateProduct;
@@ -99,7 +83,7 @@ app.put('/api/products/:id', async (req, res) => {
   }
 })
 
-//delete a product
+// delete a product
 
 app.delete('/api/products/:id', async (req, res) => {
   try {
@@ -115,7 +99,68 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 })
 
+// users
+// register
 
-app.listen(5000, '10.0.1.47', () => {
+app.post('/users', async (req, res) => {
+  try {
+    const { user, password } = req.body;
+    const salt = await bcrypt.genSalt(12);
+    const hash = await bcrypt.hash(password, salt);
+    const checkUser = await pool.query("SELECT * FROM users WHERE user_name = $1", [user]);
+    if (checkUser.rows[0] === undefined) {
+      const newUser = await pool.query("INSERT INTO users (user_name, user_password) VALUES ($1, $2) RETURNING user_name", [user, hash]);
+      console.log(`User ${newUser.rows[0].user_name} has been registered`);
+      res.status(200).send(`User ${newUser.rows[0].user_name} has been successfully registered`);
+    } else if (checkUser.rows[0] !== undefined) {
+      res.status(400).send('User already exists');
+    }
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).send('Server Error');
+  }
+})
+
+// login
+
+app.post('/users/login', async (req, res) => {
+  try {
+    const { user, password } = req.body;
+    const userLogin = await pool.query("SELECT * FROM users WHERE user_name = $1", [user]);
+    if (userLogin.rows[0] === undefined) {
+      res.status(404).send('User not found');
+    } else if (userLogin.rows[0] !== undefined) {
+      const isMatch = await bcrypt.compare(password, userLogin.rows[0].user_password);
+      if (isMatch) {
+        res.status(200).send('Login successful');
+      } else if (!isMatch) {
+        res.status(400).send('Password incorrect');
+      }
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error')
+  }
+})
+
+// Experimental!!
+// upload image
+
+// app.post('/api/images', async (req, res) => {
+//   let file = req.files.file;
+//   try {
+//     await console.log();
+//     await file.mv(`${__dirname}/../client/public/assets/uploads/${file.name}`);
+//     res.send(`${file.name} uploaded!`).status(200);
+//     console.log(`${file.name} uploaded!`);
+//   } catch (err) {
+//     res.status(500).send(err);
+//     console.log(err);
+//   }
+// })
+
+
+
+app.listen(5000, () => {
   console.log('Server is running on port 5000');
 })

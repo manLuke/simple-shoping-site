@@ -1,4 +1,5 @@
 # simple-shoping-site
+#### client - frontend in vue.js
 
 ## Project setup
 ```
