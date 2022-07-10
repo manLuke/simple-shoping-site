@@ -2,9 +2,9 @@
   <div class="admin">
     <div class="admin-container">
       <div class="admin-setType">
-        <button @click="methodType='add'">Přidat</button>
-        <button @click="methodType='update'">Upravit</button>
-        <button @click="methodType='delete'">Smazat</button>
+        <button :class="{ selectType: selectType(add) }" @click="methodType='add'">Přidat</button>
+        <button :class="{ selectType: selectType(update) }" @click="methodType='update'">Upravit</button>
+        <button :class="{ selectType: selectType(delete) }" @click="methodType='delete'">Smazat</button>
       </div>
       <div class="admin-manage">
         
@@ -50,6 +50,10 @@ const methodType = ref('add')
     transition: all 0.2s ease;
     cursor: pointer;
     &:hover {
+      background-color: #1b1b1b;
+      color: #fff;
+    }
+    .selectType {
       background-color: #1b1b1b;
       color: #fff;
     }

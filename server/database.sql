@@ -1,3 +1,5 @@
+CREATE DATABASE bakery-products;
+
 CREATE TABLE products(
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
