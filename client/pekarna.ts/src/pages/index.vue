@@ -3,7 +3,7 @@
     <h2 id="index-title">Vyberte si z našeho zboží.</h2>
     <div class="mainPage">
       <div class="mainPage-products">
-        <singleProduct v-for="item in getAllProducts" :key="item.id" :product="item" />
+        <singleProduct v-for="(item, index) in getAllProducts" :key="index" :product="item" />
       </div>
     </div>
   </div>
@@ -21,7 +21,10 @@ const store = useProductsStore()
 const getAllProducts = computed(() => store.getAllProducts)
 
 // methods
-const checkQuantity = () => store.checkQuantity()
+const checkQuantity = () => {
+  console.log("checkQuantity - store.checkQuantity()")
+  store.checkQuantity()
+}
 
 </script>
 

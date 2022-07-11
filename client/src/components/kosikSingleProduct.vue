@@ -27,7 +27,7 @@ export default {
     counter
   },
   computed: {
-    ...mapGetters(['isProductSelected', 'getPriceByProductId']),
+    ...mapGetters(['getPriceByProductId']),
     imgSrc () {
       return `assets/img/${this.product.title}.webp`
     }

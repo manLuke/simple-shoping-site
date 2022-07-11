@@ -14,28 +14,31 @@
 </template>
 
 <script setup lang="ts">
-import { useProductsStore } from '@/stores/index'
+import { useProductsStore } from '@/stores/products';
 import counter from '@/components/counter.vue'
-import { computed } from 'vue';
+import { computed, defineProps } from 'vue';
 
 // pinia
 const store = useProductsStore();
 
 // props
 const props = defineProps({
-  product: Object
-})
+  product: {
+    type: Object,
+    required: true,
+  }
+});
 
 // computed
-const isProductSelected = computed(() => store.isProductSelected())
-const imgSrc = computed(() => `assets/img/${props.product.title}.webp`)
-const quntity = computed(
-  get(): number {
-  return this.$store.getters.getQuantityById(props.product.id)
-},
-  set(value) {
-  this.$store.commit('setQuantityById', { id: props.product.id, quantity: value })
-})
+const imgSrc = computed(() => `assets/img/${props.product.title}.webp`);
+// const quntity = computed({
+//   get(): number {
+//     return store.getQuantityById(props.product.id)
+//   },
+//   set(value): void {
+//     store.setQuantityById({ id: props.product.id, quantity: value })
+//   }
+// })
 
 </script>
 

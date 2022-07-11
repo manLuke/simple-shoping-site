@@ -1,30 +1,37 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <navbar />
+  <router-view id="page"/>
 </template>
 
+<script setup lang="ts">
+import navbar from './components/navbar.vue'
+import { useProductsStore } from './stores/products'
+import { onBeforeMount } from 'vue'
+
+// pinia
+const store = useProductsStore();
+
+const getProductsFromAPI = onBeforeMount(() => store.getProductsFromAPI());
+</script>
+
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-nav {
-  padding: 30px;
+body {
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
+  background-color: rgb(207, 207, 207);
   }
+
+#app {
+  font-family: "Inter", -apple-system, "BlinkMacSystemFont", "San Francisco", "Segoe UI", "Helvetica Neue", "Liberation Sans", Roboto, sans-serif;
 }
+
+#page {
+  padding: 15vh 0 5vh 0;
+}
+
 </style>

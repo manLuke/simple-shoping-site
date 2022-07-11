@@ -9,7 +9,7 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import kosikSingleProduct from '../components/kosikSingleProduct.vue'
 import { useProductsStore } from '@/stores/products'
 import { computed } from '@vue/runtime-core'

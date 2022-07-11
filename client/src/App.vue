@@ -11,7 +11,7 @@ export default {
   components: {
     navbar
   },
-  mounted () {
+  beforeCreate () {
     this.$store.dispatch('getProductsFromAPI')
   }
 }

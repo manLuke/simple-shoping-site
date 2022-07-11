@@ -2,9 +2,9 @@
   <div class="admin">
     <div class="admin-container">
       <div class="admin-setType">
-        <button :class="{ selectType: selectType(add) }" @click="methodType='add'">Přidat</button>
-        <button :class="{ selectType: selectType(update) }" @click="methodType='update'">Upravit</button>
-        <button :class="{ selectType: selectType(delete) }" @click="methodType='delete'">Smazat</button>
+        <button :class="{ selectType: selectType('add') }" @click="methodType='add'">Přidat</button>
+        <button :class="{ selectType: selectType('update') }" @click="methodType='update'">Upravit</button>
+        <button :class="{ selectType: selectType('delete') }" @click="methodType='delete'">Smazat</button>
       </div>
       <div class="admin-manage">
         

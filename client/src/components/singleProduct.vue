@@ -13,7 +13,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import counter from '../components/counter.vue'
 
 export default {
@@ -25,18 +24,17 @@ export default {
     counter
   },
   computed: {
-    ...mapGetters(['isProductSelected']),
     imgSrc () {
       return `assets/img/${this.product.title}.webp`
     },
-    quntity: {
-      get () {
-        return this.$store.getters.getQuantityById(this.product.id)
-      },
-      set (value) {
-        this.$store.commit('setQuantityById', { id: this.product.id, quantity: value })
-      }
-    }
+    // quntity: {
+    //   get () {
+    //     return this.$store.getters.getQuantityById(this.product.id)
+    //   },
+    //   set (value) {
+    //     this.$store.commit('setQuantityById', { id: this.product.id, quantity: value })
+    //   }
+    // }
   }
 }
 </script>
