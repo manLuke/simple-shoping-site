@@ -1,5 +1,4 @@
-# simple-shoping-site
-#### client - frontend in vue.js
+# pekarna.ts
 
 ## Project setup
 ```

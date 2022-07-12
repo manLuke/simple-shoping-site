@@ -1,34 +1,37 @@
 <template>
-  <div class="index" @click="checkQuantity()">
+<div class="index" @click="checkQuantity()">
     <h2 id="index-title">Vyberte si z našeho zboží.</h2>
     <div class="mainPage">
       <div class="mainPage-products">
-        <singleProduct v-for="item in getAllProducts" :key="item.id" :product="item" />
+        <singleProduct v-for="item in getAllProducts" :key="item.id" :product="item"/>
       </div>
     </div>
-  </div>
+</div>
 </template>
 
-<script setup lang="ts">
+<script>
 import singleProduct from '../components/singleProduct.vue'
-import { useProductsStore } from '@/stores/products.ts'
-import { computed } from '@vue/runtime-core'
+import { mapGetters } from 'vuex'
 
-// pinia
-const store = useProductsStore()
-
-// computed
-const getAllProducts = computed(() => store.getAllProducts)
-const checkQuantity = () => {
-  store.checkQuantity()
+export default {
+  name: 'index',
+  components: {
+    singleProduct
+  },
+  computed: {
+    ...mapGetters(['getAllProducts'])
+  },
+  methods: {
+    checkQuantity() {
+      this.$store.dispatch('checkQuantity')
+    }
+  }
 }
-
 </script>
 
 <style lang="scss">
 .index {
   text-align: center;
-
   #index-title {
     font-size: 2em;
     margin: 1rem;

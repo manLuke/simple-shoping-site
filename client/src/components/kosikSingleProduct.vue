@@ -7,35 +7,36 @@
     <div class="kosik-pruduct-info-second">
       <counter class="kosik-product-quantity" :product="product" />
         <div class="kosik-product-price">
-          <p>{{ getPriceByProductId(product.id) }} Kč</p>
+          <p>{{ getPriceByProductId }} Kč</p>
         </div>
-      <div class="kosik-product-remove" @click="removeProduct(product.id)"><svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler-x" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+      <div class="kosik-product-remove" @click="removeProduct()"><svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler-x" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
     </div>
   </div>
 </template>
 
-<script>
-import { mapGetters, mapMutations } from 'vuex'
+<script setup lang="ts">
 import counter from '../components/counter.vue'
+import { useProductsStore } from '@/stores/products';
+import { defineProps, computed } from 'vue';
 
-export default {
-  name: 'product - kosik',
-  props: {
-    product: Object
-  },
-  components: {
-    counter
-  },
-  computed: {
-    ...mapGetters(['getPriceByProductId']),
-    imgSrc () {
-      return `assets/img/${this.product.title}.webp`
-    }
-  },
-  methods: {
-    ...mapMutations(['removeProduct'])
+// pinia
+const store = useProductsStore();
+
+// props
+const props = defineProps({
+  product: {
+    type: Object,
+    required: true
   }
-}
+});
+
+// computed
+const getPriceByProductId = computed(() => store.getPriceByProductId(props.product.id));
+const imgSrc = computed(() => `assets/img/${props.product.title}.webp`);
+
+// methods
+const removeProduct = () => store.removeProduct(props.product.id);
+
 </script>
 
 <style lang="scss">
@@ -50,6 +51,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0px 0px 10px hsla(0, 0%, 0%, 0.1);
 }
 
 .kosik-product-info {
@@ -102,16 +104,18 @@ export default {
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 700px) {
   .kosik-product {
     flex-direction: column;
     height: 180px;
-    max-width: 400px;
+    max-width: 500px;
   }
   .kosik-product-price {
     margin: 0 1rem;
   }
   .kosik-pruduct-info-second {
+    display: flex;
+    justify-content: center;
     width: 100%;
   }
 }

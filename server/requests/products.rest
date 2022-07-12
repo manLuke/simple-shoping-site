@@ -1,0 +1,32 @@
+GET http://10.0.1.47:5000/api/products
+// Get all products
+
+###
+
+GET http://10.0.1.47:5000/api/products/:id
+// Get product by id
+
+###
+
+POST http://10.0.1.47:5000/api/products
+// Create new product
+Content-Type: application/json
+{
+  "title": "",
+  "description": "",
+  "price": 0,
+}
+
+###
+
+PUT http://10.0.1.47:5000/api/products/:id
+// Update product by id
+Content-Type: application/json
+{
+  "description": "",
+}
+
+###
+
+DELETE http://10.0.1.47:5000/api/products/:id
+// Delete product by id

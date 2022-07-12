@@ -1,0 +1,20 @@
+
+POST http://10.0.1.47:5000/users/signup
+Content-Type: application/json
+// sign up
+
+{
+    "username": "MrsMustard",
+    "password": "MrsMustardIsTheBest"
+}
+
+###
+
+POST  http://10.0.1.47:5000/users/login
+Content-Type: application/json 
+// login in
+
+{
+    "username": "MrHat",
+    "password": "MrHatIsTheBest"
+}

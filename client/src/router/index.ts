@@ -15,6 +15,11 @@ const routes = [
     path: '/admin',
     name: 'Spravujte produkty',
     component: () => import('@/pages/admin.vue')
+  },
+  {
+    path: '/login',
+    name: 'Přihlášení',
+    component: () => import('@/pages/login.vue')
   }
 ]
 

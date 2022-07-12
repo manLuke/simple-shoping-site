@@ -3,15 +3,18 @@
   <router-view id="page"/>
 </template>
 
-<script setup lang="ts">
+<script>
 import navbar from './components/navbar.vue'
-import { useProductsStore } from './stores/products'
-import { onBeforeMount } from 'vue'
 
-// pinia
-const store = useProductsStore();
-
-const getProductsFromAPI = onBeforeMount(() => store.getProductsFromAPI());
+export default {
+  name: 'app',
+  components: {
+    navbar
+  },
+  beforeCreate () {
+    this.$store.dispatch('getProductsFromAPI')
+  }
+}
 </script>
 
 <style lang="scss">

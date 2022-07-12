@@ -1,10 +1,10 @@
 <template>
-  <nav class="navbar">
-    <a class="navbar-admin" @click="this.$router.push('/admin')">Admin</a>
+  <nav class="navbar" @click="store.checkQuantity()">
+    <a class="navbar-admin" @click="router.push('/admin')">Admin</a>
     <div class="navbar-logo">
-      <a @click="this.$router.push('/')">Pekárna.cz</a>
+      <a @click="$router.push('/')">Pekárna.cz</a>
     </div>
-    <div class="navbar-cart" @click="this.$router.push('/kosik')">
+    <div class="navbar-cart" @click="router.push('/kosik')">
       <div class="cart-logo">
         <svg
           version="1.0"
@@ -37,15 +37,18 @@
   </nav>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup lang="ts">
+import { useProductsStore } from '@/stores/products'
+import { useRouter } from 'vue-router';
+import { computed } from 'vue'
 
-export default {
-  name: 'navbar',
-  computed: {
-    ...mapGetters(['getQuantity', 'getPrice'])
-  }
-}
+// pinia & router
+const store = useProductsStore();
+const router = useRouter();
+
+// computed
+const getQuantity = computed(() => store.getQuantity)
+const getPrice = computed(() => store.getPrice)
 
 </script>
 

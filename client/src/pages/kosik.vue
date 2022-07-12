@@ -1,5 +1,5 @@
 <template>
-  <div class="kosik-empty-page" @click="checkQuantity()">
+  <div class="kosik-empty-page" @click="store.checkQuantity()">
     <div v-if="getQuantity===0" class="kosik-empty">
       <span>Máte prázdný košík, pojďme to <i @click="this.$router.push('/')" id="kosik-empty-change">změnit</i></span>
     </div>
@@ -9,24 +9,18 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import kosikSingleProduct from '../components/kosikSingleProduct.vue'
-import { mapGetters } from 'vuex'
+import { useProductsStore } from '@/stores/products'
+import { computed } from '@vue/runtime-core'
 
-export default {
-  name: 'kosik',
-  components: {
-    kosikSingleProduct
-  },
-  computed: {
-    ...mapGetters(['getQuantity', 'getSelectedProducts'])
-  },
-  methods: {
-    checkQuantity() {
-      this.$store.dispatch('checkQuantity')
-    }
-  }
-}
+// pinia
+const store = useProductsStore()
+
+// computed
+const getQuantity = computed(() => store.getQuantity)
+const getSelectedProducts = computed(() => store.getSelectedProducts)
+
 </script>
 
 <style lang="scss" scoped>

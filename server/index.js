@@ -1,9 +1,11 @@
+require("dotenv").config();
 const express = require('express');
 const http = require('http');
 // const fileUpload = require('express-fileupload');
 // const fs = require('fs');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const app = express();
 const pool = require('./db');
 
@@ -102,14 +104,14 @@ app.delete('/api/products/:id', async (req, res) => {
 // users
 // register
 
-app.post('/users', async (req, res) => {
+app.post('/users/signup', async (req, res) => {
   try {
-    const { user, password } = req.body;
+    const { username, password } = req.body;
     const salt = await bcrypt.genSalt(12);
     const hash = await bcrypt.hash(password, salt);
-    const checkUser = await pool.query("SELECT * FROM users WHERE user_name = $1", [user]);
+    const checkUser = await pool.query("SELECT * FROM users WHERE user_name = $1", [username]);
     if (checkUser.rows[0] === undefined) {
-      const newUser = await pool.query("INSERT INTO users (user_name, user_password) VALUES ($1, $2) RETURNING user_name", [user, hash]);
+      const newUser = await pool.query("INSERT INTO users (user_name, user_password) VALUES ($1, $2) RETURNING user_name", [username, hash]);
       console.log(`User ${newUser.rows[0].user_name} has been registered`);
       res.status(200).send(`User ${newUser.rows[0].user_name} has been successfully registered`);
     } else if (checkUser.rows[0] !== undefined) {
@@ -125,14 +127,16 @@ app.post('/users', async (req, res) => {
 
 app.post('/users/login', async (req, res) => {
   try {
-    const { user, password } = req.body;
-    const userLogin = await pool.query("SELECT * FROM users WHERE user_name = $1", [user]);
+    const { username, password } = req.body;
+    const userLogin = await pool.query("SELECT * FROM users WHERE user_name = $1", [username]);
     if (userLogin.rows[0] === undefined) {
       res.status(404).send('User not found');
     } else if (userLogin.rows[0] !== undefined) {
       const isMatch = await bcrypt.compare(password, userLogin.rows[0].user_password);
       if (isMatch) {
-        res.status(200).send('Login successful');
+        // res.status(200).send('Login successful');
+        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '60sec' });
+        res.status(201).json({ accessToken: accessToken });
       } else if (!isMatch) {
         res.status(400).send('Password incorrect');
       }
@@ -142,6 +146,17 @@ app.post('/users/login', async (req, res) => {
     res.status(500).send('Server Error')
   }
 })
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token == null) return res.status(401)
+  jwt.verify(token, process.env.ACCES_TOKEN_SECRET, (err, user) => {
+    if (err) return res.status(403)
+    req.user = user
+    next()
+  })
+}
 
 // Experimental!!
 // upload image
@@ -161,6 +176,6 @@ app.post('/users/login', async (req, res) => {
 
 
 
-app.listen(5000, '192.168.0.115', () => {
+app.listen(5000, '10.0.1.47', () => {
   console.log('Server is running on port 5000');
 })

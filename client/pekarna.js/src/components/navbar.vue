@@ -1,8 +1,8 @@
 <template>
-  <nav class="navbar" @click="store.checkQuantity()">
+  <nav class="navbar">
     <a class="navbar-admin" @click="this.$router.push('/admin')">Admin</a>
     <div class="navbar-logo">
-      <a @click="$router.push('/')">Pekárna.cz</a>
+      <a @click="this.$router.push('/')">Pekárna.cz</a>
     </div>
     <div class="navbar-cart" @click="this.$router.push('/kosik')">
       <div class="cart-logo">
@@ -37,16 +37,15 @@
   </nav>
 </template>
 
-<script setup lang="ts">
-import { useProductsStore } from '@/stores/products'
-import { computed } from 'vue'
+<script>
+import { mapGetters } from 'vuex'
 
-// pinia
-const store = useProductsStore();
-
-// computed
-const getQuantity = computed(() => store.getQuantity)
-const getPrice = computed(() => store.getPrice)
+export default {
+  name: 'navbar',
+  computed: {
+    ...mapGetters(['getQuantity', 'getPrice'])
+  }
+}
 
 </script>
 

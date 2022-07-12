@@ -9,20 +9,24 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script>
 import kosikSingleProduct from '../components/kosikSingleProduct.vue'
-import { useProductsStore } from '@/stores/products'
-import { computed } from '@vue/runtime-core'
+import { mapGetters } from 'vuex'
 
-// pinia
-const store = useProductsStore()
-
-// computed
-const getQuantity = computed(() => store.getQuantity)
-const getSelectedProducts = computed(() => store.getSelectedProducts)
-
-// methods
-const checkQuantity = computed(() => store.checkQuantity)
+export default {
+  name: 'kosik',
+  components: {
+    kosikSingleProduct
+  },
+  computed: {
+    ...mapGetters(['getQuantity', 'getSelectedProducts'])
+  },
+  methods: {
+    checkQuantity() {
+      this.$store.dispatch('checkQuantity')
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
