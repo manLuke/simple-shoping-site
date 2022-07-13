@@ -1,19 +1,19 @@
 require("dotenv").config();
 const express = require('express');
 const http = require('http');
-// const fileUpload = require('express-fileupload');
-// const fs = require('fs');
+const fileUpload = require('express-fileupload');
+const fs = require('fs');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const app = express();
 const pool = require('./db');
-const { application } = require("express");
 
 
 app.use(express.json()); // => req.body
 app.use(cors());
-// app.use(fileUpload());
+app.use(fileUpload());
+
 
 // ROUTES
 
@@ -49,12 +49,16 @@ app.get('/api/products/:id', async (req, res) => {
 
 // create a product
 
-app.post('/api/products', async (req, res) => {
+app.post('/api/products', authenticateToken, async (req, res) => {
   try {
     const { title, description, price } = req.body;
-    const newProduct = await pool.query("INSERT INTO products (title, description, price) VALUES ($1, $2, $3) RETURNING *", [title, description, price]);
-    console.log(req.body);
-    res.json(newProduct.rows[0]);
+    if (title === "" || price === "") {
+      res.status(400).send('Missing parameters');
+    } else {
+      const newProduct = await pool.query("INSERT INTO products (title, description, price) VALUES ($1, $2, $3) RETURNING *", [title, description, price]);
+      console.log(req.body);
+      res.json(newProduct.rows[0]);
+    }
   } catch (err) {
     console.error(err.message);
   }
@@ -102,7 +106,13 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 })
 
+
+
+// ==========================================================================================
+
 // users
+
+
 // register
 
 app.post('/users/signup', async (req, res) => {
@@ -136,7 +146,7 @@ app.post('/users/login', async (req, res) => {
       const isMatch = await bcrypt.compare(password, userLogin.rows[0].user_password);
       if (isMatch) {
         // res.status(200).send('Login successful');
-        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '2min' });
+        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '10min' });
         res.status(201).json({ token: accessToken });
       } else if (!isMatch) {
         res.status(400).send('Password incorrect');
@@ -148,7 +158,8 @@ app.post('/users/login', async (req, res) => {
   }
 })
 
-// check token
+// token verification
+
 app.post('/users/checktoken', async (req, res) => {
   try {
     const { token } = req.body;
@@ -160,25 +171,27 @@ app.post('/users/checktoken', async (req, res) => {
   } catch (err) {
     console.error(err.message);
     if (err.message === "jwt expired") {
-      res.status(403).json({"verification": "Přihlášení vypršelo"});
+      res.status(403).json({"verification": "Login expired"});
     } else if (err.message === 'invalid token' || err.message === 'invalid signature') {
       console.log("-----------------")
       console.warn("Invalid token");
       console.warn("Suspicious activity");
       console.log("-----------------")
-      res.status(401).json({"verification": "Validní token"});
+      res.status(401).json({"verification": "Invalid token"});
     } else {
       res.status(500).send('Server Error');
     }
   }
 });
 
+// user authentication before accessing actions (add products...)
+
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   if (token == null) return res.status(401)
   jwt.verify(token, process.env.ACCES_TOKEN_SECRET, (err, user) => {
-    if (err) return res.status(403)
+    if (err) return res.status(403).send('Akce odmítnuta');
     req.user = user
     next()
   })
@@ -187,19 +200,21 @@ function authenticateToken(req, res, next) {
 // Experimental!!
 // upload image
 
-// app.post('/api/images', async (req, res) => {
-//   let file = req.files.file;
-//   try {
-//     await console.log();
-//     await file.mv(`${__dirname}/../client/public/assets/uploads/${file.name}`);
-//     res.send(`${file.name} uploaded!`).status(200);
-//     console.log(`${file.name} uploaded!`);
-//   } catch (err) {
-//     res.status(500).send(err);
-//     console.log(err);
-//   }
-// })
-
+app.post('/api/images', authenticateToken, async (req, res) => {
+  try {
+    if (req.files) {
+      let file = req.files.file;
+      await file.mv(`${__dirname}/../client/public/assets/uploads/${file.name}`);
+      res.send(`${file.name} uploaded!`).status(200);
+      console.log(`${file.name} uploaded!`);
+    } else {
+      res.status(404).send('File not found');
+    }
+  } catch (err) {
+    res.status(500).send(err);
+    console.log(err);
+  }
+})
 
 
 app.listen(5000, '10.0.1.47', () => {

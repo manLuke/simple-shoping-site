@@ -60,7 +60,7 @@ const login = async() => {
 .login-container {
   width: 350px;
   max-width: 90%;
-  padding: .85em 1.5em;
+  padding: 1em 1.5em;
   background-color: #fff;
   border-radius: 5px;
   display: grid;

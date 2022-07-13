@@ -12,13 +12,16 @@
 <script setup lang="ts">
 import singleProduct from '@/components/singleProduct.vue'
 import { useProductsStore } from '@/stores/products'
-import { computed } from '@vue/runtime-core'
+import { computed, onBeforeMount } from '@vue/runtime-core'
 
 // pinia
 const store = useProductsStore()
 
 // computed
 const getAllProducts = computed(() => store.getAllProducts)
+
+// mounted
+onBeforeMount(() => store.getProductsFromAPI());
 
 </script>
 
