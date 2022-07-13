@@ -31,25 +31,26 @@
           </g>
         </svg>
       </div>
-      <div class="cart-quantity"><p>{{ getQuantity }}</p></div>
+      <div class="cart-quantity">
+        <p>{{ getQuantity }}</p>
+      </div>
       <div class="price">{{ getPrice }} Kč</div>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { useProductsStore } from '@/stores/products'
+import { useProductsStore } from '@/stores/products';
 import { useRouter } from 'vue-router';
-import { computed } from 'vue'
+import { computed } from 'vue';
 
 // pinia & router
 const store = useProductsStore();
 const router = useRouter();
 
 // computed
-const getQuantity = computed(() => store.getQuantity)
-const getPrice = computed(() => store.getPrice)
-
+const getQuantity = computed(() => store.getQuantity);
+const getPrice = computed(() => store.getPrice);
 </script>
 
 <style lang="scss">
@@ -83,7 +84,7 @@ const getPrice = computed(() => store.getPrice)
   flex-direction: column;
   width: 80px;
   height: 80px;
-  padding: .5rem;
+  padding: 0.5rem;
   position: absolute;
   right: 0;
   top: 0;
@@ -107,7 +108,7 @@ const getPrice = computed(() => store.getPrice)
     border-radius: 5rem;
   }
   .price {
-    font-size: .5em;
+    font-size: 0.5em;
     transform: translateX(4px);
   }
 }
@@ -117,7 +118,7 @@ const getPrice = computed(() => store.getPrice)
   font-size: 1rem;
   position: fixed;
   z-index: 1;
-  left: .5rem;
+  left: 0.5rem;
   cursor: pointer;
   &:hover {
     text-decoration: underline;

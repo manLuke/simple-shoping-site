@@ -8,6 +8,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const app = express();
 const pool = require('./db');
+const { application } = require("express");
 
 
 app.use(express.json()); // => req.body
@@ -135,8 +136,8 @@ app.post('/users/login', async (req, res) => {
       const isMatch = await bcrypt.compare(password, userLogin.rows[0].user_password);
       if (isMatch) {
         // res.status(200).send('Login successful');
-        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '60sec' });
-        res.status(201).json({ accessToken: accessToken });
+        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '2min' });
+        res.status(201).json({ token: accessToken });
       } else if (!isMatch) {
         res.status(400).send('Password incorrect');
       }
@@ -146,6 +147,31 @@ app.post('/users/login', async (req, res) => {
     res.status(500).send('Server Error')
   }
 })
+
+// check token
+app.post('/users/checktoken', async (req, res) => {
+  try {
+    const { token } = req.body;
+    const decoded = jwt.verify(token, process.env.ACCES_TOKEN_SECRET);
+    console.log(decoded);
+    if (decoded.user) {
+      res.status(200).json({"verification": "successful"});
+    } 
+  } catch (err) {
+    console.error(err.message);
+    if (err.message === "jwt expired") {
+      res.status(403).json({"verification": "Přihlášení vypršelo"});
+    } else if (err.message === 'invalid token' || err.message === 'invalid signature') {
+      console.log("-----------------")
+      console.warn("Invalid token");
+      console.warn("Suspicious activity");
+      console.log("-----------------")
+      res.status(401).json({"verification": "Validní token"});
+    } else {
+      res.status(500).send('Server Error');
+    }
+  }
+});
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];

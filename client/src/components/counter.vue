@@ -4,7 +4,7 @@
   </div>
   <div v-else-if="store.isProductSelected(product.id)" class="product-add product-select">
     <a class="product-button-left" @click="quantityMinus()"><svg data-test="IconMinus" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" id="33a6ed2a-d7c8-414b-92a2-f6e3322d8167"><path fill="#1C2529" fill-rule="evenodd" clip-rule="evenodd" d="M13 9H3C2.45 9 2 8.55 2 8C2 7.45 2.45 7 3 7H13C13.55 7 14 7.45 14 8C14 8.55 13.55 9 13 9Z"></path></svg></a>
-    <input id="product-v-model" type="number" v-model="quntity" min="0" max="60" pattern="[0-9]*"/>
+    <input id="product-v-model" type="number" v-model="quntity" min="0" max="60" pattern="[0-9]*" maxlength="2"/>
     <a :class="{'product-button-right': !stopAddingQuantity, stopAdding: stopAddingQuantity }" @click="quantityPlus()"><svg data-test="IconPlus" xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 16 16"> <path fill="#1C2529" fill-rule="evenodd" clip-rule="evenodd" d="M13 9H9V13C9 13.55 8.55 14 8 14C7.45 14 7 13.55 7 13V9H3C2.45 9 2 8.55 2 8C2 7.45 2.45 7 3 7H7V3C7 2.45 7.45 2 8 2C8.55 2 9 2.45 9 3V7H13C13.55 7 14 7.45 14 8C14 8.55 13.55 9 13 9Z"></path></svg></a>
   </div>
 </template>
