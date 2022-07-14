@@ -7,10 +7,10 @@
         <button :class="{ requestType: select(requestType.DELETE) }" @click="methodType=requestType.DELETE">Smazat</button>
       </div>
       <div class="admin-manage">
-        <span class="msg responseMsg">{{ responseMsg }}</span>
-        <span class="msg errorMsg">{{ errorMsg }}</span>
-        <div v-if="methodType===requestType.ADD" class="admin-manage-add" acceptcharset="UTF-8" enctype="multipart/form-data">
-          <form @submit.prevent="addProductFile(); addProduct();">
+        <span v-if="responseMsg!==''" class="msg responseMsg">{{ responseMsg }}</span>
+        <span v-if="errorMsg!==''" class="msg errorMsg">{{ errorMsg }}</span>
+        <div v-if="methodType===requestType.ADD" class="admin-manage-add primary-form" acceptcharset="UTF-8" enctype="multipart/form-data">
+          <form @submit.prevent="addProductFile(); addProduct(); refreshData();">
             <label for="title">Název</label>
             <input type="text" v-model="product.title" required>
             <label for="price">Cena</label>
@@ -25,29 +25,42 @@
             <button type="submit">Přidat</button>
           </form>
         </div>
-        <div v-if="methodType===requestType.UPDATE" class="admin-manage-update">
-          <select v-model.number="updateProduct.order">
-            <option v-for="(item, index) in store.getAllProducts" :value="index" :key="index">{{ item.title }}</option>
+        <div v-if="methodType===requestType.UPDATE" class="admin-manage-update  primary-form primary-select">
+          <select v-model.number="updateProduct.id">
+            <option v-for="(item, index) in store.getAllProducts" :value="item.id" :key="index">{{ item.title }}</option>
           </select>
-          <form>
-            <label @submit.prevent=""></label>
+          <form @submit.prevent="confirmUpdateProduct(); refreshData();">
             <label for="title">Název</label>
-            <input type="text" v-model="product.title" required>
+            <input type="text" id="readonlyInput" :value="updateProduct.title" readonly disabled title="You can't change that">
             <label for="price">Cena</label>
-            <input type="text" v-model="product.price" required>
+            <input type="text" v-model="updateProduct.price" required>
             <label for="description">Popis</label>
-            <textarea v-model="product.description" maxlength="255"></textarea>
-            <button submit=""></button>
+            <textarea v-model="updateProduct.description" maxlength="255"></textarea>
+            <button type="submit">Potvrdit</button>
           </form>
         </div>
-        <div v-if="methodType===requestType.DELETE" class="admin-manage-delete"></div>
+        <div v-if="methodType===requestType.DELETE" class="admin-manage-delete primary-form primary-select">
+         <select v-model.number="deleteProduct.id">
+            <option v-for="(item, index) in store.getAllProducts" :value="item.id" :key="index">{{ item.title }}</option>
+          </select>
+          <form @submit.prevent="confirmDeleteProduct(); refreshData();">
+            <label @submit.prevent=""></label>
+            <label for="title">Název</label>
+            <input type="text" id="readonlyInput" :value="deleteProduct.title" readonly disabled title="You can't change that">
+            <label for="price">Cena</label>
+            <input type="text" :value="deleteProduct.price" readonly disabled>
+            <label for="description">Popis</label>
+            <textarea :value="deleteProduct.description" maxlength="255" readonly disabled></textarea>
+            <button type="submit">Smazet</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, watch } from 'vue';
 const url = 'http://10.0.1.47:5000';
 import { useProductsStore } from '@/stores/products';
 import axios from 'axios';
@@ -55,6 +68,7 @@ import axios from 'axios';
 // pinia
 const store = useProductsStore();
 
+// typescript
 enum requestType {
   ADD = 'add',
   DELETE = 'delete',
@@ -62,30 +76,68 @@ enum requestType {
 }
 
 // data
-const responseMsg = ref('Success');
+const responseMsg = ref('');
 const errorMsg = ref('');
 const methodType = ref(requestType.ADD);
 const product = reactive({
   title: '',
   description: '',
-  price: 0,
+  price: null,
   imgType: ''
 });
 
 const updateProduct = reactive({
-  order: 0,
-  title: '',
-  description: '',
-  price: 0
+  title: store.getAllProducts[0].title,
+  description: store.getAllProducts[0].description,
+  price: store.getAllProducts[0].price,
+  id: store.getAllProducts[0].id,
 })
 
+const deleteProduct = reactive({
+  title: store.getAllProducts[0].title,
+  description: store.getAllProducts[0].description,
+  price: store.getAllProducts[0].price,
+  id: store.getAllProducts[0].id,
+})
+
+// watch
+watch(() => (updateProduct.id), (newId) => {
+  updateProduct.title = store.getProductById(newId).title;
+  updateProduct.description = store.getProductById(newId).description;
+  updateProduct.price = store.getProductById(newId).price;
+})
+
+watch(() => (deleteProduct.id), (newId) => {
+  deleteProduct.title = store.getProductById(newId).title;
+  deleteProduct.description = store.getProductById(newId).description;
+  deleteProduct.price = store.getProductById(newId).price;
+})
 
 // methods
+const refreshData = () => {
+  store.getProductsFromAPI();
+}
+
 const select = (type: requestType) => {
-  errorMsg.value = ''
-  responseMsg.value = ''
   return methodType.value === type
 };
+
+const displayMessage = (message: string, type: "err" | "res") => {
+  if (type === "err") {
+    errorMsg.value = message
+  } else {
+    responseMsg.value = message
+  }
+  setTimeout(() => {
+    responseMsg.value = ''
+    errorMsg.value = ''
+  }, 8000)
+}
+
+
+// Create product
+
+// encode string to binary
 
 const toUTF8Array = (str: string): number[] => {
   let utf8 = [];
@@ -118,12 +170,6 @@ const toUTF8Array = (str: string): number[] => {
   return utf8;
 }
 
-// Create product
-
-// encode string to binary
-
-// ...
-
 const addProductFile = async() => {
   try {
     const fileName = await toUTF8Array(`${product.title}.${product.imgType}`);
@@ -134,9 +180,10 @@ const addProductFile = async() => {
       headers: {
         'Content-Type': 'multipart/form-data',
         'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }}
-    )} catch (error:any) {
-    errorMsg.value = error.response.data
+      }})
+    displayMessage('Success', 'res')
+    } catch (error:any) {
+    displayMessage(error.response.data, 'err')
   }
 }
 
@@ -151,17 +198,43 @@ const addProduct = async() => {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
     })
-    responseMsg.value = response.data.title;
-    console.log(response);
-      
+    displayMessage(response.data.title, 'res')      
   } catch(err: any) {
-    errorMsg.value = err.response.data;
+    displayMessage(err.response.data, 'err')
   }
 }
 
 // update product
 
-// const getSelectedProducts = computed(() => store.getSelectedProducts);
+const confirmUpdateProduct = async() => {
+  try {
+    const response = await axios.put(`${url}/api/products/${updateProduct.id}`, {
+      description: updateProduct.description,
+      price: updateProduct.price
+    },{
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+  }})
+    displayMessage(response.data, 'res');
+  } catch(err: any) {
+    displayMessage(err.response.data, 'err');
+  }
+}
+
+// delete product
+
+const confirmDeleteProduct = async() => {
+  try {
+    const response = await axios.delete(`${url}/api/products/${deleteProduct.id}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    displayMessage(response.data, 'res');
+  } catch(err: any) {
+    displayMessage(err.response.data, 'err');
+  }
+}
 
 </script>
 
@@ -188,6 +261,7 @@ const addProduct = async() => {
   margin: 1rem 0 0 0;
   button {
     background-color: #fff;
+    color: #1b1b1b;
     border: 1px solid #1b1b1b;
     border-radius: 5px;
     padding: 0.5em 1em;
@@ -224,12 +298,12 @@ const addProduct = async() => {
   display: grid;
   place-items: center;
   max-width: 560px;
-  width: 90%;
+  width: 85%;
   padding: 1em 1.5em;
 }
 
-// add product
-.admin-manage-add {
+// manage-producta
+.primary-form {
   width: 90%;
   form {
     display: flex;
@@ -281,6 +355,14 @@ const addProduct = async() => {
   }
 }
 
+// update product
+.primary-select {
+  select {
+    width: 100%;
+    margin-top: 1rem;
+    }
+}
+
 @media screen and (max-width: 500px) {
   .admin-setType {
     font-size: 12px;
@@ -294,9 +376,3 @@ const addProduct = async() => {
 }
 
 </style>
-  <!-- <form method="POST" action="/" enctype="multipart/form-data">
-    <input type="file" name="file" accept="images/*" required>
-    <input type="text" name="title" required>
-    <input type="text" placeholder="není povinné" name="description" required>
-    <input type="submit" value="Upload">
-  </form> -->

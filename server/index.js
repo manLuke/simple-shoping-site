@@ -75,7 +75,7 @@ app.post('/api/products', authenticateToken, async (req, res) => {
 
 // update a product
 
-app.put('/api/products/:id', async (req, res) => {
+app.put('/api/products/:id', authenticateToken, async (req, res) => {
   let updateProduct;
   const { id } = req.params;
   const argKey = Object.keys(req.body);
@@ -83,15 +83,15 @@ app.put('/api/products/:id', async (req, res) => {
     console.log(argKey)
     if (argKey.length === 1) {
       const updateProduct = await pool.query(`UPDATE products SET ${argKey} = $1 WHERE id = $2 RETURNING *`, [req.body[argKey], id]);
-      res.json(updateProduct.rows[0]);
+      res.send(updateProduct.rows[0].title + ' was updated');
     } else if (argKey.length === 2) {
       const updateProduct = await pool.query(`UPDATE products SET ${argKey[0]} = $1, ${argKey[1]} = $2 WHERE id = $3 RETURNING *`, [req.body[argKey[0]], req.body[argKey[1]], id]);
-      res.json(updateProduct.rows[0]);
+      res.send(updateProduct.rows[0].title + ' was updated');
     } else if (argKey === 3) {
       const updateProduct = await pool.query(`UPDATE products SET ${argKey[0]} = $1, ${argKey[1]} = $2, ${argKey[2]} = $3 WHERE id = $4 RETURNING *`, [req.body[argKey[0]], req.body[argKey[1]], req.body[argKey[2]], id]);
-      res.json(updateProduct.rows[0]);
+      res.send(updateProduct.rows[0].title + ' was updated');
     } else {
-      res.status(400).send('Bad Request');
+      res.status(400).send('Problem with parameters');
     }
   } catch (err) {
     console.error(err.message);
@@ -101,7 +101,7 @@ app.put('/api/products/:id', async (req, res) => {
 
 // delete a product
 
-app.delete('/api/products/:id', async (req, res) => {
+app.delete('/api/products/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const deleteProduct = await pool.query("DELETE FROM products WHERE id = $1", [id]);
@@ -155,7 +155,7 @@ app.post('/users/login', async (req, res) => {
       const isMatch = await bcrypt.compare(password, userLogin.rows[0].user_password);
       if (isMatch) {
         // res.status(200).send('Login successful');
-        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '30min' });
+        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '5min' });
         res.status(201).json({ token: accessToken });
       } else if (!isMatch) {
         res.status(400).send('Password incorrect');
@@ -198,7 +198,13 @@ app.post('/users/checktoken', async (req, res) => {
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  if (token == null) return res.status(401)
+  if (token == null) {
+    console.log("-----------------")
+    console.warn("Missing token");
+    console.warn("Suspicious activity");
+    console.log("-----------------")
+    return res.status(401).json("Missing token");
+  }
   jwt.verify(token, process.env.ACCES_TOKEN_SECRET, (err, user) => {
     if (err) return res.status(403).send('Akce odmítnuta');
     req.user = user
