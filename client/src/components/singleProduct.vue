@@ -6,7 +6,7 @@
     <div class="products-info">
       <h2>{{ product.title }}</h2>
       <div class="product-price">
-        <p>{{ product.price }}0 Kč</p>
+        <p>{{ product.price }} Kč</p>
         <counter :product="product" />
       </div>
     </div>

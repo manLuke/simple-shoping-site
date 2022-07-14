@@ -8,12 +8,22 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const app = express();
 const pool = require('./db');
+require('buffer');
+
 
 
 app.use(express.json()); // => req.body
 app.use(cors());
 app.use(fileUpload());
 
+
+app.post('/byte', (req, res) => {
+  const { arr } = req.body;
+  const convert = (from, to) => str => Buffer.from(str, from).toString(to)
+  const hexToUtf8 = convert('hex', 'utf8')
+  const response = hexToUtf8(arr)
+  res.send(response)
+})
 
 // ROUTES
 
@@ -56,7 +66,6 @@ app.post('/api/products', authenticateToken, async (req, res) => {
       res.status(400).send('Missing parameters');
     } else {
       const newProduct = await pool.query("INSERT INTO products (title, description, price) VALUES ($1, $2, $3) RETURNING *", [title, description, price]);
-      console.log(req.body);
       res.json(newProduct.rows[0]);
     }
   } catch (err) {
@@ -146,7 +155,7 @@ app.post('/users/login', async (req, res) => {
       const isMatch = await bcrypt.compare(password, userLogin.rows[0].user_password);
       if (isMatch) {
         // res.status(200).send('Login successful');
-        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '10min' });
+        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '30min' });
         res.status(201).json({ token: accessToken });
       } else if (!isMatch) {
         res.status(400).send('Password incorrect');
@@ -203,10 +212,14 @@ function authenticateToken(req, res, next) {
 app.post('/api/images', authenticateToken, async (req, res) => {
   try {
     if (req.files) {
+      const convert = (from, to) => str => Buffer.from(str, from).toString(to)
       let file = req.files.file;
-      await file.mv(`${__dirname}/../client/public/assets/uploads/${file.name}`);
-      res.send(`${file.name} uploaded!`).status(200);
-      console.log(`${file.name} uploaded!`);
+      const hexToUtf8 = convert('hex', 'utf8')
+      const nameArray = file.name.split(',');
+      const fileName = hexToUtf8(nameArray)
+      await file.mv(`${__dirname}/../client/public/assets/img/${fileName}`);
+      res.send(`${fileName} uploaded!`).status(200);
+      console.log(`${fileName} uploaded!`);
     } else {
       res.status(404).send('File not found');
     }

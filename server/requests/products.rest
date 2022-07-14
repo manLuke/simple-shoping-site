@@ -28,5 +28,5 @@ Content-Type: application/json
 
 ###
 
-DELETE http://10.0.1.47:5000/api/products/:id
+DELETE http://10.0.1.47:5000/api/products/38
 // Delete product by id
