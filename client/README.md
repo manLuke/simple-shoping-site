@@ -1,4 +1,4 @@
-# pekarna.ts
+# pekarna.ts-client
 
 ## Project setup
 ```

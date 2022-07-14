@@ -68,7 +68,7 @@ onMounted(() => {
   checkAdding();
 });
 
-watch(quntity, (value) => {
+watch(quntity, () => {
   checkAdding();
 });
 </script>

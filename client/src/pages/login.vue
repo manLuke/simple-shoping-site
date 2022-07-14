@@ -17,11 +17,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-const url = 'http://10.0.1.47:5000';
-// const url = process.env.URL;
+const url = process.env.VUE_APP_URL;
 
 const router = useRouter();
 

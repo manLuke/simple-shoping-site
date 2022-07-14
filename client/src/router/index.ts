@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { createRouter, createWebHistory, RouteLocationNormalized } from 'vue-router'
-const url = 'http://10.0.1.47:5000';
+import { createRouter, createWebHistory } from 'vue-router'
+const url = process.env.VUE_APP_URL;
 // const url = process.env.URL;
 
 

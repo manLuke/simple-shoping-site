@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { defineStore } from 'pinia';
-const url = 'http://10.0.1.47:5000/api/products';
-// const url = process.env.URL_PRODUCTS;
+const url = process.env.VUE_APP_URL_PRODUCTS;
 
 type Product = {
   id: number;

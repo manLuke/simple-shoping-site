@@ -60,8 +60,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, watch } from 'vue';
-const url = 'http://10.0.1.47:5000';
+import { reactive, ref, watch } from 'vue';
+const url = process.env.VUE_APP_URL;
 import { useProductsStore } from '@/stores/products';
 import axios from 'axios';
 

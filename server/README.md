@@ -1,5 +1,6 @@
 # simple-shoping-site
 #### server - backend in express.js
+#### for database using postgresql
 
 ## Project setup
 ```
