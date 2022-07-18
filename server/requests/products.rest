@@ -1,32 +1,34 @@
-GET http://10.0.1.47:5000/api/products
+GET http://localhost:5000/api/products
 // Get all products
 
 ###
 
-GET http://10.0.1.47:5000/api/products/:id
+GET http://localhost:5000/api/products/:id
 // Get product by id
 
 ###
 
-POST http://10.0.1.47:5000/api/products
+POST http://localhost:5000/api/products
 // Create new product
 Content-Type: application/json
+
 {
-  "title": "",
-  "description": "",
-  "price": 0,
+    "title": "Pekárna Brod Rohlík",
+    "price": 2.50
 }
 
 ###
 
-PUT http://10.0.1.47:5000/api/products/:id
+PUT http://localhost:5000/api/products/:1
 // Update product by id
 Content-Type: application/json
+
 {
-  "description": "",
+  "is_visible": false, 
 }
 
 ###
 
-DELETE http://10.0.1.47:5000/api/products/38
+DELETE http://localhost:5000/api/products/38
 // Delete product by id
+###

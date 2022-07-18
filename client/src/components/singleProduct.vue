@@ -27,7 +27,7 @@ const props = defineProps({
 });
 
 // computed
-const imgSrc = computed(() => `assets/img/${props.product.title}.webp`);
+const imgSrc = computed(() => `assets/img/${props.product.img_src}`);
 
 </script>
 

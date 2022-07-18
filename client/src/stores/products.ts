@@ -1,18 +1,7 @@
 import axios from 'axios';
 import { defineStore } from 'pinia';
 const url = process.env.VUE_APP_URL_PRODUCTS;
-
-type Product = {
-  id: number;
-  price: number;
-  title: string;
-  discription: string;
-};
-
-type selectedProduct = {
-  id: number;
-  quantity: any;
-};
+import { Product, selectedProduct } from '@/types/index';
 
 type State = {
   products: Product[];
@@ -38,7 +27,7 @@ export const useProductsStore = defineStore('products', {
       );
       return obj || [];
     },
-    getProductById: (state: State) => (id: number) =>
+    getProductById: (state: State) => (id: number) => <Product>
       state.products.find((product) => product.id === id) || {},
     getQuantityById: (state: State) => (id: number) => {
       const product = state.selectedProducts.find((p) => p.id === id);

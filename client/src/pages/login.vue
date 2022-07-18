@@ -52,8 +52,7 @@ const login = async() => {
 .login {
   display: grid;
   place-items: center;
-  padding: 0 !important;
-  height: 95vh;
+  height: 100vh;
 }
 
 .login-container {

@@ -1,6 +1,6 @@
 <template>
   <navbar />
-  <router-view id="page"/>
+  <router-view />
 </template>
 
 <script setup lang="ts">
@@ -28,10 +28,6 @@ body {
 
 #app {
   font-family: "Inter", -apple-system, "BlinkMacSystemFont", "San Francisco", "Segoe UI", "Helvetica Neue", "Liberation Sans", Roboto, sans-serif;
-}
-
-#page {
-  padding: 15vh 0 5vh 0;
 }
 
 </style>

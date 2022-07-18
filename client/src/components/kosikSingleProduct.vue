@@ -32,7 +32,7 @@ const props = defineProps({
 
 // computed
 const getPriceByProductId = computed(() => store.getPriceByProductId(props.product.id));
-const imgSrc = computed(() => `assets/img/${props.product.title}.webp`);
+const imgSrc = computed(() => `assets/img/${props.product.img_src}`);
 
 // methods
 const removeProduct = () => store.removeProduct(props.product.id);

@@ -28,6 +28,7 @@ onBeforeMount(() => store.getProductsFromAPI());
 <style lang="scss">
 .index {
   text-align: center;
+  padding: 15vh 0 5vh 0;
 
   #index-title {
     font-size: 2em;

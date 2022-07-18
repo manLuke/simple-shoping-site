@@ -1,5 +1,5 @@
 
-POST http://10.0.1.47:5000/users/signup
+POST http://localhost:5000/users/signup
 Content-Type: application/json
 // sign up
 
@@ -10,7 +10,7 @@ Content-Type: application/json
 
 ###
 
-POST  http://10.0.1.47:5000/users/login
+POST  http://localhost:5000/users/login
 Content-Type: application/json 
 // login in
 

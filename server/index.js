@@ -17,19 +17,22 @@ app.use(cors());
 app.use(fileUpload());
 
 
-app.post('/byte', (req, res) => {
-  const { arr } = req.body;
-  const convert = (from, to) => str => Buffer.from(str, from).toString(to)
-  const hexToUtf8 = convert('hex', 'utf8')
-  const response = hexToUtf8(arr)
-  res.send(response)
-})
-
 // ROUTES
 
-// get all products
+// get all products, that are is_visible
 
 app.get('/api/products', async (req, res) => {
+  try {
+    const allProducts = await pool.query('SELECT * FROM products WHERE is_visible = TRUE');
+    res.json(allProducts.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+})
+
+// get all products, only for admin
+app.get('/admin/products', authenticateToken, async (req, res) => {
   try {
     const allProducts = await pool.query('SELECT * FROM products');
     res.json(allProducts.rows);
@@ -61,11 +64,11 @@ app.get('/api/products/:id', async (req, res) => {
 
 app.post('/api/products', authenticateToken, async (req, res) => {
   try {
-    const { title, description, price } = req.body;
+    const { title, description, price, is_visible } = req.body;
     if (title === "" || price === "") {
       res.status(400).send('Missing parameters');
     } else {
-      const newProduct = await pool.query("INSERT INTO products (title, description, price) VALUES ($1, $2, $3) RETURNING *", [title, description, price]);
+      const newProduct = await pool.query("INSERT INTO products (title, description, price, is_visible) VALUES ($1, $2, $3, $4) RETURNING *", [title, description, price, is_visible]);
       res.json(newProduct.rows[0]);
     }
   } catch (err) {
@@ -78,17 +81,25 @@ app.post('/api/products', authenticateToken, async (req, res) => {
 app.put('/api/products/:id', authenticateToken, async (req, res) => {
   let updateProduct;
   const { id } = req.params;
-  const argKey = Object.keys(req.body);
+  const input = req.body;
+  // catch parameters on which the database would throw errors
+  await Object.keys(input).forEach(key => {
+    if (input[key] === null || input[key] === "") {
+      delete input[key];
+    }
+  });
+  // ...and update the product
+  const argKeys = Object.keys(input);
   try {
-    console.log(argKey)
-    if (argKey.length === 1) {
-      const updateProduct = await pool.query(`UPDATE products SET ${argKey} = $1 WHERE id = $2 RETURNING *`, [req.body[argKey], id]);
+    console.log(argKeys)
+    if (argKeys.length === 1) {
+      const updateProduct = await pool.query(`UPDATE products SET ${argKeys} = $1 WHERE id = $2 RETURNING *`, [req.body[argKeys], id]);
       res.send(updateProduct.rows[0].title + ' was updated');
-    } else if (argKey.length === 2) {
-      const updateProduct = await pool.query(`UPDATE products SET ${argKey[0]} = $1, ${argKey[1]} = $2 WHERE id = $3 RETURNING *`, [req.body[argKey[0]], req.body[argKey[1]], id]);
+    } else if (argKeys.length === 2) {
+      const updateProduct = await pool.query(`UPDATE products SET ${argKeys[0]} = $1, ${argKeys[1]} = $2 WHERE id = $3 RETURNING *`, [req.body[argKeys[0]], req.body[argKeys[1]], id]);
       res.send(updateProduct.rows[0].title + ' was updated');
-    } else if (argKey === 3) {
-      const updateProduct = await pool.query(`UPDATE products SET ${argKey[0]} = $1, ${argKey[1]} = $2, ${argKey[2]} = $3 WHERE id = $4 RETURNING *`, [req.body[argKey[0]], req.body[argKey[1]], req.body[argKey[2]], id]);
+    } else if (argKeys === 3) {
+      const updateProduct = await pool.query(`UPDATE products SET ${argKeys[0]} = $1, ${argKeys[1]} = $2, ${argKeys[2]} = $3 WHERE id = $4 RETURNING *`, [req.body[argKeys[0]], req.body[argKeys[1]], req.body[argKeys[2]], id]);
       res.send(updateProduct.rows[0].title + ' was updated');
     } else {
       res.status(400).send('Problem with parameters');
@@ -104,11 +115,9 @@ app.put('/api/products/:id', authenticateToken, async (req, res) => {
 app.delete('/api/products/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const deleteProduct = await pool.query("DELETE FROM products WHERE id = $1", [id]);
-    // fs.unlinkSync(`${__dirname}/../client/public/assets/uploads/${productName.rows[0].title}.webp`);
-    console.log("Deleting product...");
-    console.log("Product was successfully deleted");
-    res.json("Product was successfully deleted");
+    const product = await pool.query("DELETE FROM products WHERE id = $1 RETURNING img_src, title", [id]);
+    fs.unlinkSync(`${__dirname}/../client/public/assets/img/${product.rows[0].img_src}`);
+    res.json(`${product.rows[0].title} was successfully deleted`);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -155,7 +164,7 @@ app.post('/users/login', async (req, res) => {
       const isMatch = await bcrypt.compare(password, userLogin.rows[0].user_password);
       if (isMatch) {
         // res.status(200).send('Login successful');
-        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '5min' });
+        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '20min' });
         res.status(201).json({ token: accessToken });
       } else if (!isMatch) {
         res.status(400).send('Password incorrect');
@@ -223,7 +232,10 @@ app.post('/api/images', authenticateToken, async (req, res) => {
       const hexToUtf8 = convert('hex', 'utf8')
       const nameArray = file.name.split(',');
       const fileName = hexToUtf8(nameArray)
+      const productTitle = fileName.split('.')[0];
+      console.log(productTitle);
       await file.mv(`${__dirname}/../client/public/assets/img/${fileName}`);
+      await pool.query("UPDATE products SET img_src = $1 WHERE title = $2", [fileName, productTitle]);
       res.send(`${fileName} uploaded!`).status(200);
       console.log(`${fileName} uploaded!`);
     } else {
@@ -236,6 +248,6 @@ app.post('/api/images', authenticateToken, async (req, res) => {
 })
 
 
-app.listen(5000, '10.0.1.47', () => {
+app.listen(5000, () => {
   console.log('Server is running on port 5000');
 })

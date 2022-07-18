@@ -10,47 +10,58 @@
         <span v-if="responseMsg!==''" class="msg responseMsg">{{ responseMsg }}</span>
         <span v-if="errorMsg!==''" class="msg errorMsg">{{ errorMsg }}</span>
         <div v-if="methodType===requestType.ADD" class="admin-manage-add primary-form" acceptcharset="UTF-8" enctype="multipart/form-data">
-          <form @submit.prevent="addProductFile(); addProduct(); refreshData();">
+          <form @submit.prevent="addProductFile(); confirmAddProduct();">
             <label for="title">Název</label>
-            <input type="text" v-model="product.title" required>
+            <input type="text" v-model="addProduct.title" required>
             <label for="price">Cena</label>
-            <input type="text" v-model="product.price" required>
+            <input type="text" v-model="addProduct.price" required>
             <label for="description">Popis</label>
-            <textarea v-model="product.description" maxlength="255"></textarea>
+            <textarea v-model="addProduct.description" maxlength="255"></textarea>
+            <div class="input-visibility">
+              <label for="visibility">Product's visibility for public</label>
+              <input type="checkbox" v-model="addProduct.is_visible">
+            </div>
             <label for="img">Obrázek produktu</label>
             <div class="input-file">
-              <input type="file" name="file" id="file" accept="images/*" required/>
-              <input type="text" v-model="product.imgType" placeholder="webp" style="width: 50px" maxlength="5" required>
+              <input type="file" name="file" id="file" required/>
+              <input type="text" v-model="addProduct.imgType" placeholder="webp" style="width: 50px" maxlength="5" required>
             </div>
             <button type="submit">Přidat</button>
           </form>
         </div>
         <div v-if="methodType===requestType.UPDATE" class="admin-manage-update  primary-form primary-select">
           <select v-model.number="updateProduct.id">
-            <option v-for="(item, index) in store.getAllProducts" :value="item.id" :key="index">{{ item.title }}</option>
+            <option v-for="(item, index) in allProducts" :value="item.id" :key="index">{{ item.title }}</option>
           </select>
-          <form @submit.prevent="confirmUpdateProduct(); refreshData();">
+          <form @submit.prevent="confirmUpdateProduct(); getAllProductsAsAdmin();">
             <label for="title">Název</label>
             <input type="text" id="readonlyInput" :value="updateProduct.title" readonly disabled title="You can't change that">
             <label for="price">Cena</label>
             <input type="text" v-model="updateProduct.price" required>
             <label for="description">Popis</label>
             <textarea v-model="updateProduct.description" maxlength="255"></textarea>
+            <div class="input-visibility">
+              <label for="visibility">Product's visibility for public</label>
+              <input type="checkbox" v-model="updateProduct.is_visible">
+            </div>
             <button type="submit">Potvrdit</button>
           </form>
         </div>
         <div v-if="methodType===requestType.DELETE" class="admin-manage-delete primary-form primary-select">
          <select v-model.number="deleteProduct.id">
-            <option v-for="(item, index) in store.getAllProducts" :value="item.id" :key="index">{{ item.title }}</option>
+            <option v-for="(item, index) in allProducts" :value="item.id" :key="index">{{ item.title }}</option>
           </select>
-          <form @submit.prevent="confirmDeleteProduct(); refreshData();">
-            <label @submit.prevent=""></label>
+          <form @submit.prevent="confirmDeleteProduct(); getAllProductsAsAdmin();">
             <label for="title">Název</label>
-            <input type="text" id="readonlyInput" :value="deleteProduct.title" readonly disabled title="You can't change that">
+            <input type="text" id="readonlyInput" :value="deleteProduct.title" disabled title="You can't change that">
             <label for="price">Cena</label>
-            <input type="text" :value="deleteProduct.price" readonly disabled>
+            <input type="text" :value="deleteProduct.price" disabled>
             <label for="description">Popis</label>
-            <textarea :value="deleteProduct.description" maxlength="255" readonly disabled></textarea>
+            <textarea :value="deleteProduct.description" maxlength="255" disabled></textarea>
+            <div class="input-visibility">
+              <label for="visibility">Product's visibility for public</label>
+              <input type="checkbox" v-model="deleteProduct.is_visible" disabled>
+            </div>
             <button type="submit">Smazet</button>
           </form>
         </div>
@@ -60,67 +71,92 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue';
-const url = process.env.VUE_APP_URL;
+import { onBeforeMount, reactive, ref, watch } from 'vue';
 import { useProductsStore } from '@/stores/products';
+import { AdminProduct, requestType } from '@/types/index';
 import axios from 'axios';
+const url = process.env.VUE_APP_URL;
 
 // pinia
 const store = useProductsStore();
 
-// typescript
-enum requestType {
-  ADD = 'add',
-  DELETE = 'delete',
-  UPDATE = 'update',
-}
+// mounted
+onBeforeMount(() => {
+  getAllProductsAsAdmin();
+})
 
 // data
-const responseMsg = ref('');
-const errorMsg = ref('');
+const allProducts = ref<AdminProduct[]>([]);
+const responseMsg = ref<string>('');
+const errorMsg = ref<string>('');
 const methodType = ref(requestType.ADD);
-const product = reactive({
+const addProduct = reactive({
+  id: null,
   title: '',
   description: '',
   price: null,
-  imgType: ''
+  imgType: '',
+  is_visible: false,
 });
 
 const updateProduct = reactive({
-  title: store.getAllProducts[0].title,
-  description: store.getAllProducts[0].description,
-  price: store.getAllProducts[0].price,
-  id: store.getAllProducts[0].id,
+  title: '',
+  description: '',
+  price: null,
+  id: null,
+  is_visible: null,
 })
 
 const deleteProduct = reactive({
-  title: store.getAllProducts[0].title,
-  description: store.getAllProducts[0].description,
-  price: store.getAllProducts[0].price,
-  id: store.getAllProducts[0].id,
+  title: '',
+  description: '',
+  price: null,
+  id: null,
+  is_visible: null,
 })
 
 // watch
+
 watch(() => (updateProduct.id), (newId) => {
-  updateProduct.title = store.getProductById(newId).title;
-  updateProduct.description = store.getProductById(newId).description;
-  updateProduct.price = store.getProductById(newId).price;
+  updateProduct.title = adminGetProductById(newId).title;
+  updateProduct.description = adminGetProductById(newId).description;
+  updateProduct.price = adminGetProductById(newId).price;
+  updateProduct.is_visible = adminGetProductById(newId).is_visible;
 })
 
 watch(() => (deleteProduct.id), (newId) => {
-  deleteProduct.title = store.getProductById(newId).title;
-  deleteProduct.description = store.getProductById(newId).description;
-  deleteProduct.price = store.getProductById(newId).price;
+  deleteProduct.title = adminGetProductById(newId).title;
+  deleteProduct.description = adminGetProductById(newId).description;
+  deleteProduct.price = adminGetProductById(newId).price;
+  deleteProduct.is_visible = adminGetProductById(newId).is_visible;
 })
 
 // methods
-const refreshData = () => {
-  store.getProductsFromAPI();
+
+const getAllProductsAsAdmin = async () => {
+  try {
+    const response = await axios.get(`${url}/admin/products`,{
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    allProducts.value = response.data
+    updateProduct.id = response.data[0].id;
+    deleteProduct.id = response.data[0].id;
+  } catch (error: any) {
+    displayMessage(error.response.data, 'err');
+  }
 }
+
+const adminGetProductById = (id: number): AdminProduct => {
+  return allProducts.value.find((product) => product.id === id) || {}
+};
 
 const select = (type: requestType) => {
   return methodType.value === type
 };
+
+// display message from Backend
 
 const displayMessage = (message: string, type: "err" | "res") => {
   if (type === "err") {
@@ -139,7 +175,7 @@ const displayMessage = (message: string, type: "err" | "res") => {
 
 // encode string to binary
 
-const toUTF8Array = (str: string): number[] => {
+const toUTF8Array = (str: string) => {
   let utf8 = [];
   for (var i=0; i < str.length; i++) {
       var charcode = str.charCodeAt(i);
@@ -172,10 +208,10 @@ const toUTF8Array = (str: string): number[] => {
 
 const addProductFile = async() => {
   try {
-    const fileName = await toUTF8Array(`${product.title}.${product.imgType}`);
+    const fileNameArr = await toUTF8Array(`${addProduct.title}.${addProduct.imgType}`);
     var formData = new FormData();
     var imagefile: any = document.querySelector('#file');
-    formData.append("file", imagefile.files[0], fileName);
+    formData.append("file", imagefile.files[0], fileNameArr);
     axios.post(`${url}/api/images`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -187,18 +223,19 @@ const addProductFile = async() => {
   }
 }
 
-const addProduct = async() => {
+const confirmAddProduct = async() => {
   try {
     const response = await axios.post(`${url}/api/products`, {
-      title: product.title,
-      description: product.description,
-      price: product.price
+      title: addProduct.title,
+      description: addProduct.description,
+      price: addProduct.price,
+      is_visible: addProduct.is_visible,
     }, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
     })
-    displayMessage(response.data.title, 'res')      
+    displayMessage(response.data.title, 'res');
   } catch(err: any) {
     displayMessage(err.response.data, 'err')
   }
@@ -210,12 +247,14 @@ const confirmUpdateProduct = async() => {
   try {
     const response = await axios.put(`${url}/api/products/${updateProduct.id}`, {
       description: updateProduct.description,
-      price: updateProduct.price
+      price: updateProduct.price,
+      is_visible: updateProduct.is_visible,
     },{
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
   }})
     displayMessage(response.data, 'res');
+    getAllProductsAsAdmin();
   } catch(err: any) {
     displayMessage(err.response.data, 'err');
   }
@@ -231,6 +270,7 @@ const confirmDeleteProduct = async() => {
       }
     })
     displayMessage(response.data, 'res');
+    getAllProductsAsAdmin();
   } catch(err: any) {
     displayMessage(err.response.data, 'err');
   }
@@ -239,6 +279,10 @@ const confirmDeleteProduct = async() => {
 </script>
 
 <style lang="scss" scoped>
+
+.admin {
+  padding: 15vh 0 5vh 0;
+}
 
 .admin-container {
   background-color: #fff;
@@ -309,8 +353,19 @@ const confirmDeleteProduct = async() => {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin: .25rem 0;
     .input-file {
       display: flex;
+    }
+    .input-visibility {
+      margin: 0.5rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      label {
+        font-size: 1.1em;
+        font-weight: 600;
+      }
     }
     label {
       width: 100%;
@@ -332,6 +387,10 @@ const confirmDeleteProduct = async() => {
     input[type="file"] {
       border: none;
     };
+    input[type="checkbox"] {
+      margin: 0 10px;
+      width: 30px;
+    }
     button {
       width: 100px;
       text-align: center;
