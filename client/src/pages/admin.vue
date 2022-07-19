@@ -10,7 +10,7 @@
         <span v-if="responseMsg!==''" class="msg responseMsg">{{ responseMsg }}</span>
         <span v-if="errorMsg!==''" class="msg errorMsg">{{ errorMsg }}</span>
         <div v-if="methodType===requestType.ADD" class="admin-manage-add primary-form" acceptcharset="UTF-8" enctype="multipart/form-data">
-          <form @submit.prevent="addProductFile(); confirmAddProduct();">
+          <form @submit.prevent="confirmAddProduct();">
             <label for="title">Název</label>
             <input type="text" v-model="addProduct.title" required>
             <label for="price">Cena</label>
@@ -175,53 +175,53 @@ const displayMessage = (message: string, type: "err" | "res") => {
 
 // encode string to binary
 
-const toUTF8Array = (str: string) => {
-  let utf8 = [];
-  for (var i=0; i < str.length; i++) {
-      var charcode = str.charCodeAt(i);
-      if (charcode < 0x80) utf8.push(charcode);
-      else if (charcode < 0x800) {
-        utf8.push(0xc0 | (charcode >> 6), 
-                  0x80 | (charcode & 0x3f));
-      }
-      else if (charcode < 0xd800 || charcode >= 0xe000) {
-        utf8.push(0xe0 | (charcode >> 12), 
-                  0x80 | ((charcode>>6) & 0x3f), 
-                  0x80 | (charcode & 0x3f));
-      }
-      // surrogate pair
-      else {
-          i++;
-          // UTF-16 encodes 0x10000-0x10FFFF by
-          // subtracting 0x10000 and splitting the
-          // 20 bits of 0x0-0xFFFFF into two halves
-          charcode = 0x10000 + (((charcode & 0x3ff)<<10)
-                    | (str.charCodeAt(i) & 0x3ff));
-          utf8.push(0xf0 | (charcode >>18), 
-                    0x80 | ((charcode>>12) & 0x3f), 
-                    0x80 | ((charcode>>6) & 0x3f), 
-                    0x80 | (charcode & 0x3f));
-      }
-  }
-  return utf8;
-}
+// const toUTF8Array = (str: string) => {
+//   let utf8 = [];
+//   for (var i=0; i < str.length; i++) {
+//       var charcode = str.charCodeAt(i);
+//       if (charcode < 0x80) utf8.push(charcode);
+//       else if (charcode < 0x800) {
+//         utf8.push(0xc0 | (charcode >> 6), 
+//                   0x80 | (charcode & 0x3f));
+//       }
+//       else if (charcode < 0xd800 || charcode >= 0xe000) {
+//         utf8.push(0xe0 | (charcode >> 12), 
+//                   0x80 | ((charcode>>6) & 0x3f), 
+//                   0x80 | (charcode & 0x3f));
+//       }
+//       // surrogate pair
+//       else {
+//           i++;
+//           // UTF-16 encodes 0x10000-0x10FFFF by
+//           // subtracting 0x10000 and splitting the
+//           // 20 bits of 0x0-0xFFFFF into two halves
+//           charcode = 0x10000 + (((charcode & 0x3ff)<<10)
+//                     | (str.charCodeAt(i) & 0x3ff));
+//           utf8.push(0xf0 | (charcode >>18), 
+//                     0x80 | ((charcode>>12) & 0x3f), 
+//                     0x80 | ((charcode>>6) & 0x3f), 
+//                     0x80 | (charcode & 0x3f));
+//       }
+//   }
+//   return utf8;
+// }
 
-const addProductFile = async() => {
-  try {
-    const fileNameArr = await toUTF8Array(`${addProduct.title}.${addProduct.imgType}`);
-    var formData = new FormData();
-    var imagefile: any = document.querySelector('#file');
-    formData.append("file", imagefile.files[0], fileNameArr);
-    axios.post(`${url}/api/images`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }})
-    displayMessage('Success', 'res')
-    } catch (error:any) {
-    displayMessage(error.response.data, 'err')
-  }
-}
+// const addProductFile = async() => {
+//   try {
+//     const fileNameArr = await toUTF8Array(`${addProduct.title}.${addProduct.imgType}`);
+//     var formData = new FormData();
+//     var imagefile: any = document.querySelector('#file');
+//     formData.append("file", imagefile.files[0], fileNameArr);
+//     axios.post(`${url}/api/images`, formData, {
+//       headers: {
+//         'Content-Type': 'multipart/form-data',
+//         'Authorization': `Bearer ${localStorage.getItem('token')}`
+//       }})
+//     displayMessage('Success', 'res')
+//     } catch (error:any) {
+//     displayMessage(error.response.data, 'err')
+//   }
+// }
 
 const confirmAddProduct = async() => {
   try {

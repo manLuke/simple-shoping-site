@@ -1,8 +1,8 @@
 require("dotenv").config();
 const express = require('express');
 const http = require('http');
-const fileUpload = require('express-fileupload');
-const fs = require('fs');
+// const fileUpload = require('express-fileupload');
+// const fs = require('fs');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -14,7 +14,7 @@ require('buffer');
 
 app.use(express.json()); // => req.body
 app.use(cors());
-app.use(fileUpload());
+// app.use(fileUpload());
 
 
 // ROUTES
@@ -115,8 +115,8 @@ app.put('/api/products/:id', authenticateToken, async (req, res) => {
 app.delete('/api/products/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await pool.query("DELETE FROM products WHERE id = $1 RETURNING img_src, title", [id]);
-    fs.unlinkSync(`${__dirname}/../client/public/assets/img/${product.rows[0].img_src}`);
+    const product = await pool.query("DELETE FROM products WHERE id = $1 RETURNING title", [id]);
+    // fs.unlinkSync(`${__dirname}/../client/public/assets/img/${product.rows[0].img_src}`);
     res.json(`${product.rows[0].title} was successfully deleted`);
   } catch (err) {
     console.error(err.message);
@@ -224,28 +224,28 @@ function authenticateToken(req, res, next) {
 // Experimental!!
 // upload image
 
-app.post('/api/images', authenticateToken, async (req, res) => {
-  try {
-    if (req.files) {
-      const convert = (from, to) => str => Buffer.from(str, from).toString(to)
-      let file = req.files.file;
-      const hexToUtf8 = convert('hex', 'utf8')
-      const nameArray = file.name.split(',');
-      const fileName = hexToUtf8(nameArray)
-      const productTitle = fileName.split('.')[0];
-      console.log(productTitle);
-      await file.mv(`${__dirname}/../client/public/assets/img/${fileName}`);
-      await pool.query("UPDATE products SET img_src = $1 WHERE title = $2", [fileName, productTitle]);
-      res.send(`${fileName} uploaded!`).status(200);
-      console.log(`${fileName} uploaded!`);
-    } else {
-      res.status(404).send('File not found');
-    }
-  } catch (err) {
-    res.status(500).send(err);
-    console.log(err);
-  }
-})
+// app.post('/api/images', authenticateToken, async (req, res) => {
+//   try {
+//     if (req.files) {
+//       const convert = (from, to) => str => Buffer.from(str, from).toString(to)
+//       let file = req.files.file;
+//       const hexToUtf8 = convert('hex', 'utf8')
+//       const nameArray = file.name.split(',');
+//       const fileName = hexToUtf8(nameArray)
+//       const productTitle = fileName.split('.')[0];
+//       console.log(productTitle);
+//       // await file.mv(`${__dirname}/../client/public/assets/img/${fileName}`);
+//       await pool.query("UPDATE products SET img_src = $1 WHERE title = $2", [fileName, productTitle]);
+//       res.send(`${fileName} uploaded!`).status(200);
+//       console.log(`${fileName} uploaded!`);
+//     } else {
+//       res.status(404).send('File not found');
+//     }
+//   } catch (err) {
+//     res.status(500).send(err);
+//     console.log(err);
+//   }
+// })
 
 
 app.listen(5000, () => {

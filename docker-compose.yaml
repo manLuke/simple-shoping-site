@@ -1,0 +1,23 @@
+version: "3"
+services:
+  pekarna.ts-client:
+    container_name: client
+    build:
+      context: ./client
+      dockerfile: dockerfile
+    ports: 
+      - 8080:8080
+    volumes:
+      - './client:/app'
+      - '/app/node_modules'
+  pekarna.ts-server:
+    container_name: server
+    build:
+      context: ./server
+      dockerfile: dockerfile
+    ports:
+      - 5000:5000
+      - 5432:5432
+    volumes:
+      - './server:/api'
+      - '/api/node_modules'
