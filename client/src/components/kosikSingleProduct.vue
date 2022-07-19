@@ -32,7 +32,7 @@ const props = defineProps({
 
 // computed
 const getPriceByProductId = computed(() => store.getPriceByProductId(props.product.id));
-const imgSrc = computed(() => `assets/img/${props.product.img_src}`);
+const imgSrc = computed(() => `${process.env.VUE_APP_URL}/api/images/${props.product.id}`);
 
 // methods
 const removeProduct = () => store.removeProduct(props.product.id);

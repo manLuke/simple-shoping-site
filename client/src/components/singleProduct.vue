@@ -16,6 +16,7 @@
 <script setup lang="ts">
 import counter from '@/components/counter.vue'
 import { computed, defineProps } from 'vue';
+const url = process.env.VUE_APP_URL;
 
 
 // props
@@ -27,7 +28,7 @@ const props = defineProps({
 });
 
 // computed
-const imgSrc = computed(() => `assets/img/${props.product.img_src}`);
+const imgSrc = computed(() => `${url}/api/images/${props.product.id}`);
 
 </script>
 

@@ -2,7 +2,7 @@
   <nav class="navbar" @click="store.checkQuantity()">
     <a class="navbar-admin" @click="router.push('/admin')">Admin</a>
     <div class="navbar-logo">
-      <a @click="$router.push('/')">Pekárna.cz</a>
+      <a @click="toIndex()">Pekárna.cz</a>
     </div>
     <div class="navbar-cart" @click="router.push('/kosik')">
       <div class="cart-logo">
@@ -51,6 +51,12 @@ const router = useRouter();
 // computed
 const getQuantity = computed(() => store.getQuantity);
 const getPrice = computed(() => store.getPrice);
+
+// methods
+const toIndex = () => {
+  router.push('/');
+  store.getProductsFromAPI();
+};
 </script>
 
 <style lang="scss">

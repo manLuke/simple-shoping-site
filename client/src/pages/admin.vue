@@ -217,7 +217,6 @@ const addProductFile = async() => {
         'Content-Type': 'multipart/form-data',
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }})
-    displayMessage('Success', 'res')
     } catch (error:any) {
     displayMessage(error.response.data, 'err')
   }
@@ -235,7 +234,8 @@ const confirmAddProduct = async() => {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
     })
-    displayMessage(response.data.title, 'res');
+    getAllProductsAsAdmin();
+    displayMessage(response.data, 'res');
   } catch(err: any) {
     displayMessage(err.response.data, 'err')
   }

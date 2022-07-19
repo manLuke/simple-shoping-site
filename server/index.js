@@ -42,6 +42,19 @@ app.get('/admin/products', authenticateToken, async (req, res) => {
   }
 })
 
+// get image by id
+app.get('/api/images/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const img_src = await pool.query('SELECT img_src FROM products WHERE id = $1', [id]);
+    res.status(200).sendFile(`${__dirname}/assets/img/${img_src.rows[0].img_src}`);
+  }
+  catch (err) {
+    res.status(500).send('Server Error');
+    console.log(err);
+  }
+})
+
 // get one product
 // not use yet, vuex does the job more efficiently
 
@@ -68,8 +81,13 @@ app.post('/api/products', authenticateToken, async (req, res) => {
     if (title === "" || price === "") {
       res.status(400).send('Missing parameters');
     } else {
-      const newProduct = await pool.query("INSERT INTO products (title, description, price, is_visible) VALUES ($1, $2, $3, $4) RETURNING *", [title, description, price, is_visible]);
-      res.json(newProduct.rows[0]);
+      const checkTitle = await pool.query('SELECT title FROM products WHERE title = $1', [title]);
+      if (checkTitle.rows[0] !== undefined) {
+        res.status(400).send('Title already exists');
+      } else if (checkTitle.rows[0] === undefined) {
+        const newProduct = await pool.query("INSERT INTO products (title, description, price, is_visible) VALUES ($1, $2, $3, $4) RETURNING title", [title, description, price, is_visible]);
+        res.status(201).send(`${newProduct.rows[0].title} has been added`);
+      }
     }
   } catch (err) {
     console.error(err.message);
@@ -116,7 +134,7 @@ app.delete('/api/products/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const product = await pool.query("DELETE FROM products WHERE id = $1 RETURNING img_src, title", [id]);
-    fs.unlinkSync(`${__dirname}/../client/public/assets/img/${product.rows[0].img_src}`);
+    fs.unlinkSync(`${__dirname}/assets/img/${product.rows[0].img_src}`);
     res.json(`${product.rows[0].title} was successfully deleted`);
   } catch (err) {
     console.error(err.message);
@@ -233,11 +251,15 @@ app.post('/api/images', authenticateToken, async (req, res) => {
       const nameArray = file.name.split(',');
       const fileName = hexToUtf8(nameArray)
       const productTitle = fileName.split('.')[0];
-      console.log(productTitle);
-      await file.mv(`${__dirname}/../client/public/assets/img/${fileName}`);
-      await pool.query("UPDATE products SET img_src = $1 WHERE title = $2", [fileName, productTitle]);
-      res.send(`${fileName} uploaded!`).status(200);
-      console.log(`${fileName} uploaded!`);
+      const checkProduct = await pool.query('SELECT img_src FROM products WHERE title = $1', [productTitle]);
+      if (checkProduct.rows[0].img_src !== undefined) {
+        res.status(400);
+      } else if (checkProduct.rows[0].img_src === undefined) {
+        await file.mv(`${__dirname}/assets/img/${fileName}`);
+        await pool.query("UPDATE products SET img_src = $1 WHERE title = $2", [fileName, productTitle]);
+        res.status(200);
+        console.log(`${fileName} uploaded!`);
+      }
     } else {
       res.status(404).send('File not found');
     }
