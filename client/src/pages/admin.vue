@@ -72,13 +72,13 @@
 
 <script setup lang="ts">
 import { onBeforeMount, reactive, ref, watch } from 'vue';
-import { useProductsStore } from '@/stores/products';
+import { useRouter } from 'vue-router';
 import { AdminProduct, requestType } from '@/types/index';
 import axios from 'axios';
 const url = process.env.VUE_APP_URL;
 
-// pinia
-const store = useProductsStore();
+// router
+const router = useRouter();
 
 // mounted
 onBeforeMount(() => {
@@ -238,6 +238,9 @@ const confirmAddProduct = async() => {
     displayMessage(response.data, 'res');
   } catch(err: any) {
     displayMessage(err.response.data, 'err')
+    if (err.response.data === 'Access denied') {
+      router.push('/login')
+    }
   }
 }
 
@@ -257,6 +260,9 @@ const confirmUpdateProduct = async() => {
     getAllProductsAsAdmin();
   } catch(err: any) {
     displayMessage(err.response.data, 'err');
+    if (err.response.data === 'Access denied') {
+      router.push('/login')
+    }
   }
 }
 
@@ -273,6 +279,9 @@ const confirmDeleteProduct = async() => {
     getAllProductsAsAdmin();
   } catch(err: any) {
     displayMessage(err.response.data, 'err');
+    if (err.response.data === 'Access denied') {
+      router.push('/login')
+    }
   }
 }
 

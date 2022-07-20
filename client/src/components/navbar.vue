@@ -2,7 +2,7 @@
   <nav class="navbar" @click="store.checkQuantity()">
     <a class="navbar-admin" @click="router.push('/admin')">Admin</a>
     <div class="navbar-logo">
-      <a @click="toIndex()">Pekárna.cz</a>
+      <a @click="toIndex()">Pekárna.ts</a>
     </div>
     <div class="navbar-cart" @click="router.push('/kosik')">
       <div class="cart-logo">

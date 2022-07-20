@@ -82,11 +82,12 @@ app.post('/api/products', authenticateToken, async (req, res) => {
       res.status(400).send('Missing parameters');
     } else {
       const checkTitle = await pool.query('SELECT title FROM products WHERE title = $1', [title]);
-      if (checkTitle.rows[0] !== undefined) {
-        res.status(400).send('Title already exists');
-      } else if (checkTitle.rows[0] === undefined) {
+      if (checkTitle.rows[0] === undefined || checkTitle.rows[0] === null) {
         const newProduct = await pool.query("INSERT INTO products (title, description, price, is_visible) VALUES ($1, $2, $3, $4) RETURNING title", [title, description, price, is_visible]);
-        res.status(201).send(`${newProduct.rows[0].title} has been added`);
+        res.status(201).send(`${newProduct.rows[0].title} - has been added`);
+        console.log(`${newProduct.rows[0].title} has been added`);
+      } else if (checkTitle.rows[0] !== undefined || checkTitle.rows[0] !== null) {
+        res.status(400).send('Title already exists');
       }
     }
   } catch (err) {
@@ -109,16 +110,18 @@ app.put('/api/products/:id', authenticateToken, async (req, res) => {
   // ...and update the product
   const argKeys = Object.keys(input);
   try {
-    console.log(argKeys)
     if (argKeys.length === 1) {
       const updateProduct = await pool.query(`UPDATE products SET ${argKeys} = $1 WHERE id = $2 RETURNING *`, [req.body[argKeys], id]);
       res.send(updateProduct.rows[0].title + ' was updated');
+      console.log(updateProduct.rows[0].title + ' - was updated');
     } else if (argKeys.length === 2) {
       const updateProduct = await pool.query(`UPDATE products SET ${argKeys[0]} = $1, ${argKeys[1]} = $2 WHERE id = $3 RETURNING *`, [req.body[argKeys[0]], req.body[argKeys[1]], id]);
       res.send(updateProduct.rows[0].title + ' was updated');
+      console.log(updateProduct.rows[0].title + ' - was updated');
     } else if (argKeys === 3) {
       const updateProduct = await pool.query(`UPDATE products SET ${argKeys[0]} = $1, ${argKeys[1]} = $2, ${argKeys[2]} = $3 WHERE id = $4 RETURNING *`, [req.body[argKeys[0]], req.body[argKeys[1]], req.body[argKeys[2]], id]);
       res.send(updateProduct.rows[0].title + ' was updated');
+      console.log(updateProduct.rows[0].title + ' - was updated');
     } else {
       res.status(400).send('Problem with parameters');
     }
@@ -136,6 +139,7 @@ app.delete('/api/products/:id', authenticateToken, async (req, res) => {
     const product = await pool.query("DELETE FROM products WHERE id = $1 RETURNING img_src, title", [id]);
     fs.unlinkSync(`${__dirname}/assets/img/${product.rows[0].img_src}`);
     res.json(`${product.rows[0].title} was successfully deleted`);
+    console.log(`${product.rows[0].title} - was deleted`);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -182,7 +186,7 @@ app.post('/users/login', async (req, res) => {
       const isMatch = await bcrypt.compare(password, userLogin.rows[0].user_password);
       if (isMatch) {
         // res.status(200).send('Login successful');
-        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '20min' });
+        const accessToken = jwt.sign({ user: username }, process.env.ACCES_TOKEN_SECRET, { expiresIn: '10min' });
         res.status(201).json({ token: accessToken });
       } else if (!isMatch) {
         res.status(400).send('Password incorrect');
@@ -200,12 +204,10 @@ app.post('/users/checktoken', async (req, res) => {
   try {
     const { token } = req.body;
     const decoded = jwt.verify(token, process.env.ACCES_TOKEN_SECRET);
-    console.log(decoded);
     if (decoded.user) {
       res.status(200).json({"verification": "successful"});
     } 
   } catch (err) {
-    console.error(err.message);
     if (err.message === "jwt expired") {
       res.status(403).json({"verification": "Login expired"});
     } else if (err.message === 'invalid token' || err.message === 'invalid signature') {
@@ -233,7 +235,7 @@ function authenticateToken(req, res, next) {
     return res.status(401).json("Missing token");
   }
   jwt.verify(token, process.env.ACCES_TOKEN_SECRET, (err, user) => {
-    if (err) return res.status(403).send('Akce odmítnuta');
+    if (err) return res.status(403).send('Access denied');
     req.user = user
     next()
   })
@@ -252,13 +254,14 @@ app.post('/api/images', authenticateToken, async (req, res) => {
       const fileName = hexToUtf8(nameArray)
       const productTitle = fileName.split('.')[0];
       const checkProduct = await pool.query('SELECT img_src FROM products WHERE title = $1', [productTitle]);
-      if (checkProduct.rows[0].img_src !== undefined) {
+      if (checkProduct.rows[0].img_src === undefined || checkProduct.rows[0].img_src === null) {
+      console.log('im here ', __dirname, fileName);
+      await file.mv(`${__dirname}/assets/img/${fileName}`);
+      await pool.query("UPDATE products SET img_src = $1 WHERE title = $2", [fileName, productTitle]);
+      res.status(200);
+      console.log(`${fileName} uploaded!`);
+      } else if (checkProduct.rows[0].img_src !== undefined || checkProduct.rows[0].img_src !== null) {
         res.status(400);
-      } else if (checkProduct.rows[0].img_src === undefined) {
-        await file.mv(`${__dirname}/assets/img/${fileName}`);
-        await pool.query("UPDATE products SET img_src = $1 WHERE title = $2", [fileName, productTitle]);
-        res.status(200);
-        console.log(`${fileName} uploaded!`);
       }
     } else {
       res.status(404).send('File not found');
