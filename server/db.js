@@ -16,13 +16,14 @@ const pool = new Pool({
 
 pool.connect(() => {
     console.log('Connected to db');
-    checkDB();
+    setTimeout(() => {
+        checkDB();
+    }, 5000);
 })
 
 const checkDB = () => {
     pool.query(`SELECT * FROM products`, (err, res) => {
         if (err) {
-            console.log(err);
             pool.query(createTables, (err, res) => {
                 if (err) {
                     console.log(err);
