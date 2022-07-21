@@ -6,10 +6,10 @@ const fs = require('fs');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const app = express();
-const { pool, checkDB } = require('./db');
-require('buffer');
 
+const app = express();
+const pool = require('./db');
+require('buffer');
 
 
 app.use(express.json()); // => req.body
@@ -255,11 +255,10 @@ app.post('/api/images', authenticateToken, async (req, res) => {
       const productTitle = fileName.split('.')[0];
       const checkProduct = await pool.query('SELECT img_src FROM products WHERE title = $1', [productTitle]);
       if (checkProduct.rows[0].img_src === undefined || checkProduct.rows[0].img_src === null) {
-      console.log('im here ', __dirname, fileName);
       await file.mv(`${__dirname}/assets/img/${fileName}`);
       await pool.query("UPDATE products SET img_src = $1 WHERE title = $2", [fileName, productTitle]);
       res.status(200);
-      console.log(`${fileName} uploaded!`);
+      console.log(`${fileName} - was uploaded`);
       } else if (checkProduct.rows[0].img_src !== undefined || checkProduct.rows[0].img_src !== null) {
         res.status(400);
       }
@@ -273,6 +272,6 @@ app.post('/api/images', authenticateToken, async (req, res) => {
 })
 
 
-app.listen(5000, checkDB(), () => {
+app.listen(5000, () => {
   console.log('Server is running on port 5000');
 })

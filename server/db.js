@@ -13,6 +13,12 @@ const pool = new Pool({
 })
 
 // check if tables exist (products, users), if not create them from database.sql
+
+pool.connect(() => {
+    console.log('Connected to db');
+    checkDB();
+})
+
 const checkDB = () => {
     pool.query(`SELECT * FROM products`, (err, res) => {
         if (err) {
@@ -26,7 +32,4 @@ const checkDB = () => {
     });
 };
 
-module.exports = {
-    pool,
-    checkDB
-}
+module.exports = pool

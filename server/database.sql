@@ -12,3 +12,6 @@ CREATE TABLE users(
     user_name VARCHAR(255) NOT NULL PRIMARY KEY,
     user_password VARCHAR(255) NOT NULL
 );
+
+INSERT INTO products (title, description, price, img_src) VALUES ('Pekárna Brod Rohlík', 'Vynikající pečivo prvotřídní kvality.', 2.50, 'Pekárna Brod Rohlík.webp');
+INSERT INTO users (user_name, user_password) VALUES ('MrHat', 'MrHatIsTheBest');
