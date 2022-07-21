@@ -14,4 +14,5 @@ CREATE TABLE users(
 );
 
 INSERT INTO products (title, description, price, img_src) VALUES ('Pekárna Brod Rohlík', 'Vynikající pečivo prvotřídní kvality.', 2.50, 'Pekárna Brod Rohlík.webp');
-INSERT INTO users (user_name, user_password) VALUES ('MrHat', 'MrHatIsTheBest');
+INSERT INTO users (user_name, user_password) VALUES ('MrHat', '$2b$12$FwLkexAC/qJ5BeGLp56vweBdXKCa55k9H2q5AOzAGGAzsMNd2xhKC');
+-- password for MrHat is: MrHatIsTheBest
