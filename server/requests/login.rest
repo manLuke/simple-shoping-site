@@ -1,16 +1,16 @@
 
-POST http://localhost:5000/users/signup
+POST http://localhost:5000/api/users/signup
 Content-Type: application/json
 // sign up
 
 {
-    "username": "MrsMustard",
-    "password": "MrsMustardIsTheBest"
+    "username": "MrHat",
+    "password": "MrHatIsTheBest"
 }
 
 ###
 
-POST  http://localhost:5000/users/login
+POST  http://localhost:5000/api/users/login
 Content-Type: application/json 
 // login in
 

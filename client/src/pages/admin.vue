@@ -135,7 +135,7 @@ watch(() => (deleteProduct.id), (newId) => {
 
 const getAllProductsAsAdmin = async () => {
   try {
-    const response = await axios.get(`${url}/admin/products`,{
+    const response = await axios.get(`${url}/api/admin/products`,{
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }

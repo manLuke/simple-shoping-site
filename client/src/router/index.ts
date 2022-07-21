@@ -7,7 +7,7 @@ const url = process.env.VUE_APP_URL;
 async function checkToken() {
   try {
     if (localStorage.getItem('token')) {
-      const response: {data: {verification: string}} = await axios.post(`${url}/users/checkToken`, { token: localStorage.getItem('token') })
+      const response: {data: {verification: string}} = await axios.post(`${url}/api/users/checkToken`, { token: localStorage.getItem('token') })
       if (response.data.verification === 'successful') {
         return true;
       }

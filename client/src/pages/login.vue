@@ -33,7 +33,7 @@ const user = reactive({
 
 const login = async() => {
   try {
-    const response = await axios.post(`${url}/users/login`, {
+    const response = await axios.post(`${url}/api/users/login`, {
       username: user.username,
       password: user.password
     })

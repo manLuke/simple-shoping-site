@@ -7,7 +7,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const app = express();
-const pool = require('./db');
+const { pool, checkDB } = require('./db');
 require('buffer');
 
 
@@ -32,7 +32,7 @@ app.get('/api/products', async (req, res) => {
 })
 
 // get all products, only for admin
-app.get('/admin/products', authenticateToken, async (req, res) => {
+app.get('/api/admin/products', authenticateToken, async (req, res) => {
   try {
     const allProducts = await pool.query('SELECT * FROM products');
     res.json(allProducts.rows);
@@ -155,7 +155,7 @@ app.delete('/api/products/:id', authenticateToken, async (req, res) => {
 
 // register
 
-app.post('/users/signup', async (req, res) => {
+app.post('/api/users/signup', async (req, res) => {
   try {
     const { username, password } = req.body;
     const salt = await bcrypt.genSalt(12);
@@ -176,7 +176,7 @@ app.post('/users/signup', async (req, res) => {
 
 // login
 
-app.post('/users/login', async (req, res) => {
+app.post('/api/users/login', async (req, res) => {
   try {
     const { username, password } = req.body;
     const userLogin = await pool.query("SELECT * FROM users WHERE user_name = $1", [username]);
@@ -200,7 +200,7 @@ app.post('/users/login', async (req, res) => {
 
 // token verification
 
-app.post('/users/checktoken', async (req, res) => {
+app.post('/api/users/checktoken', async (req, res) => {
   try {
     const { token } = req.body;
     const decoded = jwt.verify(token, process.env.ACCES_TOKEN_SECRET);
@@ -273,6 +273,6 @@ app.post('/api/images', authenticateToken, async (req, res) => {
 })
 
 
-app.listen(5000, () => {
+app.listen(5000, checkDB(), () => {
   console.log('Server is running on port 5000');
 })
